@@ -73,6 +73,26 @@ CREATE TABLE IF NOT EXISTS requests (
     actual_kg REAL, note TEXT NOT NULL DEFAULT '', created_at REAL NOT NULL
 );
 CREATE TABLE IF NOT EXISTS kv (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+-- สองตารางด้านล่างเพิ่มด้วย IF NOT EXISTS จึงไม่ต้องเพิ่ม SCHEMA_VERSION (ซึ่งจะล้างข้อมูลเดิมทั้งหมด)
+CREATE TABLE IF NOT EXISTS growgreen_links (
+    member_id INTEGER PRIMARY KEY,       -- สมาชิกประเภทบริษัทที่เชื่อมกับองค์กรใน GrowGreen
+    api_key TEXT NOT NULL,               -- ต้องเก็บตัว key เพื่อใช้เรียก GrowGreen ไม่ส่งกลับไปที่หน้าเว็บ (เดโมนี้ไม่ได้เข้ารหัส)
+    key_hint TEXT NOT NULL,              -- อักษรต้นของ key ใช้ให้ผู้ใช้แยกแยะ
+    site_code TEXT NOT NULL DEFAULT '',  -- รหัสสถานที่ใน GrowGreen (ว่างได้เมื่อองค์กรมีสถานที่เดียว)
+    auto_push INTEGER NOT NULL DEFAULT 1,
+    org_name TEXT NOT NULL DEFAULT '', org_code TEXT NOT NULL DEFAULT '',
+    updated_at REAL NOT NULL, checked_at REAL
+);
+CREATE TABLE IF NOT EXISTS growgreen_pushes (
+    request_id INTEGER PRIMARY KEY, member_id INTEGER NOT NULL,
+    status TEXT NOT NULL,                -- filed = ส่งเป็นร่างแล้ว, failed = ส่งไม่สำเร็จ, held = พักไว้เพราะติดธง
+    reference_no TEXT NOT NULL,
+    documents TEXT NOT NULL DEFAULT '[]',  -- JSON: [{no, status, category}] เอกสารร่างที่ GrowGreen สร้าง
+    emission_kgco2e REAL,                -- การปล่อยที่ GrowGreen คำนวณจากค่าปัจจัยของตัวเอง
+    kg REAL, error TEXT NOT NULL DEFAULT '',
+    resend TEXT NOT NULL DEFAULT '',     -- JSON: ข้อมูลชุดที่ส่งไปแล้วไม่ได้คำตอบ เก็บไว้ส่งซ้ำให้เหมือนเดิมทุกตัวอักษร
+    attempts INTEGER NOT NULL DEFAULT 1, at REAL NOT NULL
+);
 """
 
 
@@ -117,5 +137,7 @@ def reset() -> None:
         _c().executescript("DROP TABLE IF EXISTS members; DROP TABLE IF EXISTS vehicles; DROP TABLE IF EXISTS requests; DROP TABLE IF EXISTS kv;"
                          " DROP TABLE IF EXISTS users; DROP TABLE IF EXISTS sessions; DROP TABLE IF EXISTS partners;"
                          " DROP TABLE IF EXISTS prices; DROP TABLE IF EXISTS notices; DROP TABLE IF EXISTS api_tokens;")
+        # growgreen_links และ growgreen_pushes คงไว้: เอกสารที่ส่งไปแล้วยังอยู่ใน GrowGreen และข้อมูลตัวอย่างถูกสร้างด้วยเลขอ้างอิงเดิม
+        # ประวัติการส่งจับคู่กับคำขอด้วยเลขอ้างอิง (เลขคำขอ + รหัสรับของ) แถวของคำขอเก่าที่เลขซ้ำกันจึงไม่ถูกนำมาแสดงผิดรายการ
         _c().executescript(SCHEMA)
         _c().commit()

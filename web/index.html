@@ -4,19 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>แยกถูก รับถึงบ้าน</title>
-  <meta name="theme-color" content="#065f46">
+  <meta name="theme-color" content="#0b5d3b">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/fonts.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <header class="topbar" id="topbar" hidden>
     <a class="brand" href="#" aria-label="แยกถูก รับถึงบ้าน หน้าแรก">
-      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#10b981"/><path d="M10.2 20.6A7 7 0 0 1 16 9m0 0-2.6-2.2M16 9l-2.2 2.6M21.8 11.4A7 7 0 0 1 16 23m0 0 2.6 2.2M16 23l2.2-2.6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="5" fill="#0b5d3b"/><path d="M10.2 20.6A7 7 0 0 1 16 9m0 0-2.6-2.2M16 9l-2.2 2.6M21.8 11.4A7 7 0 0 1 16 23m0 0 2.6 2.2M16 23l2.2-2.6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span>แยกถูก <b>รับถึงบ้าน</b></span>
     </a>
     <nav class="tabs" id="tabs" aria-label="เลือกหน้า"></nav>
@@ -30,7 +28,7 @@
   <!-- เข้าสู่ระบบ -->
   <section id="view-login" class="login" hidden>
     <div class="login-card">
-      <div class="login-brand"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#10b981"/><path d="M10.2 20.6A7 7 0 0 1 16 9m0 0-2.6-2.2M16 9l-2.2 2.6M21.8 11.4A7 7 0 0 1 16 23m0 0 2.6 2.2M16 23l2.2-2.6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>แยกถูก <b>รับถึงบ้าน</b></span></div>
+      <div class="login-brand"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="5" fill="#0b5d3b"/><path d="M10.2 20.6A7 7 0 0 1 16 9m0 0-2.6-2.2M16 9l-2.2 2.6M21.8 11.4A7 7 0 0 1 16 23m0 0 2.6 2.2M16 23l2.2-2.6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>แยกถูก <b>รับถึงบ้าน</b></span></div>
       <p class="muted">ถ่ายรูปถุงรีไซเคิล ให้ AI นับและแยก แล้วนัดรถมารับถึงบ้าน</p>
       <h2>เข้าใช้งานด่วนด้วยบัญชีตัวอย่าง</h2>
       <div id="quick-login" class="quick-grid"></div>

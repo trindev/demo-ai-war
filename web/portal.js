@@ -45,7 +45,7 @@ renderAll = function () { if (entered && S) renderAllBase(); };
 async function showLogin() {
   entered = false; S = null; lastJson = ''; shellKey = '';
   // ล้างสิ่งที่ค้างจากบัญชีก่อนหน้า
-  draftBags = []; draftPhotos = []; slot = null; priceData = null; carbonData = null; settingsShown = ''; drvSel = null; drvFit = '';
+  draftBags = []; draftPhotos = []; slot = null; priceData = null; carbonData = null; ggData = null; ggPreview = null; settingsShown = ''; drvSel = null; drvFit = '';
   for (const k of Object.keys(tickets)) delete tickets[k];
   openTickets.clear();
   $('#topbar').hidden = true; $('#main').hidden = true; $('#view-login').hidden = false;
@@ -91,18 +91,6 @@ $('#logout').addEventListener('click', async () => { try { await api('/logout', 
 const TYPE_COLOR = { plastic: '#3987e5', paper: '#d95926', metal: '#199e70', glass: '#c98500' };
 const TYPE_NAME = { plastic: 'พลาสติก', paper: 'กระดาษ', metal: 'โลหะ', glass: 'แก้ว' };
 
-function donut(parts, total) {
-  const R = 42, C = 2 * Math.PI * R, gap = parts.length > 1 ? 2.5 : 0;
-  let acc = 0;
-  const arcs = parts.map((p) => {
-    const len = (p.value / total) * C, seg = `<circle r="${R}" cx="60" cy="60" fill="none" stroke="${p.color}" stroke-width="14" stroke-dasharray="${Math.max(0.5, len - gap)} ${C}" stroke-dashoffset="${-acc}"><title>${p.label} ${num(p.value, 1)} กก.</title></circle>`;
-    acc += len;
-    return seg;
-  }).join('');
-  return `<svg class="donut" viewBox="0 0 120 120" role="img" aria-label="สัดส่วนน้ำหนักของวัสดุที่รอรับ"><g transform="rotate(-90 60 60)">${arcs}</g>
-    <text x="60" y="58" text-anchor="middle" class="donut-num">${num(total, 1)}</text><text x="60" y="74" text-anchor="middle" class="donut-unit">กก. รอรับ</text></svg>`;
-}
-
 function renderDashWidgets(plan, pending, stops) {
   const kg = {};
   for (const r of pending) for (const m of r.materials) { const t = S.config.materials[m.material]?.factory; if (t) kg[t] = (kg[t] || 0) + m.share * r.est_kg; }
@@ -111,21 +99,19 @@ function renderDashWidgets(plan, pending, stops) {
   const routeOf = Object.fromEntries(plan.routes.map((r) => [r.vehicle_id, r]));
   const byId = Object.fromEntries(S.requests.map((r) => [r.id, r]));
   const flagged = S.requests.filter((r) => r.flags.length).length, waiting = S.notices.filter((n) => !n.ack_at).length;
+  const maxKg = Math.max(...parts.map((x) => x.value), 1e-9);
+  // แถวบน: ช่องตัวเลขของงานวันนี้ในกรอบเดียว แล้วตามด้วยวัสดุที่รอรับและสิ่งที่ต้องดูแล (รายการรถอยู่ในคอลัมน์ข้างแผนที่ที่เดียว)
   $('#dash-widgets').innerHTML = `
-    <section class="card widget"><h2>งานวันนี้</h2>
-      <p class="big-num">${num(stops)}<small>/${num(pending.length)} จุดที่จัดลงรถ</small></p>
-      <div class="mini-stats"><div><b>${num(plan.total_km, 1)}</b><span>กม. รวม</span></div><div><b>${plan.baseline_km > 0 ? num(plan.saving_pct) + '%' : '–'}</b><span>สั้นกว่าลำดับแจ้ง</span></div>
-        <div><b>${num(pending.reduce((a, r) => a + r.bags.length, 0))}</b><span>ถุงรอรับ</span></div></div></section>
-    <section class="card widget"><h2>วัสดุที่รอรับ</h2>
-      ${total ? `<div class="donut-wrap">${donut(parts, total)}<ul class="legend-list">${parts.map((p) => `<li><span class="sw" style="background:${p.color}"></span>${p.label} ${num((p.value / total) * 100)}%<b>${num(p.value, 1)} กก.</b></li>`).join('')}</ul></div>`
+    <div class="stat-grid ledger-row">
+      <div class="stat"><b>${num(stops)}/${num(pending.length)}</b><span>จุดที่จัดลงรถ</span></div>
+      <div class="stat"><b>${num(pending.reduce((a, r) => a + r.bags.length, 0))}</b><span>ถุงรอรับ</span></div>
+      <div class="stat"><b>${num(total, 1)}</b><span>กก. รอรับ โดยประมาณ</span></div>
+      <div class="stat"><b>${num(plan.total_km, 1)}</b><span>กม. รวมของทุกคัน</span></div>
+      <div class="stat"><b>${plan.baseline_km > 0 ? num(plan.saving_pct) + '%' : '–'}</b><span>สั้นกว่าวิ่งตามลำดับที่แจ้ง</span></div>
+    </div>
+    <section class="card widget"><h2>วัสดุที่รอรับ (กก.)</h2>
+      ${total ? `<div class="hbars">${parts.map((x) => `<div class="hbar"><span class="hbar-label">${x.label} ${num((x.value / total) * 100)}%</span><span class="hbar-track"><span style="width:${Math.max(1, (x.value / maxKg) * 100)}%;background:${x.color}"></span></span><b>${num(x.value, 1)}</b></div>`).join('')}</div>`
         : '<p class="muted">ไม่มีงานรอรับ</p>'}</section>
-    <section class="card widget"><h2>รถ</h2>
-      ${S.vehicles.map((v) => {
-        const r = routeOf[v.id], n = r ? r.stops.length : 0, done = r ? r.stops.filter((s) => byId[s.request_id] && isDone(byId[s.request_id])).length : 0;
-        return `<div class="veh"><div class="row between"><strong><span class="veh-dot" style="background:${esc(v.color)};display:inline-block"></span> ${esc(v.name)}</strong>${v.active ? `<span class="muted">${r && n ? `กลับ ${hhmm(r.back_at)}` : 'ไม่มีงาน'}</span>` : '<span class="badge warn">หยุดใช้งาน</span>'}</div>
-          <div class="pbar" title="ใช้พื้นที่ ${num(r?.load_units)}/${num(v.capacity_units)} ถุง"><span style="width:${r ? Math.round((r.load_units / v.capacity_units) * 100) : 0}%;background:${esc(v.color)}"></span></div>
-          <div class="pbar-label"><span>พื้นที่ ${num(r?.load_units)}/${num(v.capacity_units)} ถุง</span><span>รับแล้ว ${num(done)}/${num(n)} จุด</span></div></div>`;
-      }).join('')}</section>
     <section class="card widget"><h2>ต้องดูแล</h2>
       <ul class="status-list">
         <li><span class="st ${flagged ? 'warn' : 'ok'}"></span>กรณีผ่อนปรนหรือต้องตรวจ<b>${num(flagged)}</b></li>
@@ -180,7 +166,8 @@ function priceDelta(series, back = 1) {
   return { now: a, pct, dir: pct > 0.05 ? 'up' : pct < -0.05 ? 'down' : 'flat' };
 }
 // ทิศทางราคาบอกด้วยสัญลักษณ์และคำ ไม่ได้ใช้สีอย่างเดียว
-const deltaBadge = (d) => `<span class="delta ${d.dir}">${d.dir === 'up' ? '▲ ขึ้น' : d.dir === 'down' ? '▼ ลง' : '– คงที่'} ${num(Math.abs(d.pct), 1)}%</span>`;
+const TRI = { up: 'M5 17l7-11 7 11z', down: 'M5 7l7 11 7-11z' };
+const deltaBadge = (d) => `<span class="delta ${d.dir}">${TRI[d.dir] ? `<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="${TRI[d.dir]}" fill="currentColor"/></svg>` : ''}${d.dir === 'up' ? 'ขึ้น' : d.dir === 'down' ? 'ลง' : 'คงที่'} ${num(Math.abs(d.pct), 1)}%</span>`;
 
 function sparkline(series) {
   const w = 96, h = 28, v = series.map((p) => p.price), lo = Math.min(...v), hi = Math.max(...v), span = hi - lo || 1;
@@ -386,7 +373,7 @@ function renderPortal() {
   const waiting = S.notices.filter((n) => !n.ack_at).length;
   $('#portal-body').innerHTML = `
     <div class="hero partner"><div class="hero-text"><p class="eyebrow">${p.kind === 'factory' ? 'โรงงานรีไซเคิล' : 'ร้านรับซื้อของเก่า'}</p><h1>${esc(p.name)}</h1>
-      <p class="hero-sub">รับ${p.accepts_label.join(' ')} · ${esc(p.hours)}</p></div>
+      <p class="hero-sub">${p.kind === 'factory' ? 'โรงงานรีไซเคิล' : 'ร้านรับซื้อของเก่า'} · รับ${p.accepts_label.join(' ')} · ${esc(p.hours)}</p></div>
       <div class="points"><b>${num(S.expected_kg, 1)}</b><small>กก. ที่คาดว่าจะได้รับวันนี้</small></div></div>
     <div class="card"><h2>ราคารับซื้อของฉันวันนี้</h2>
       <p class="muted">ราคาที่บันทึกจะขึ้นกระดานราคาทันที และผู้ดูแลระบบใช้เทียบกับคู่ค้ารายอื่น</p>
@@ -418,49 +405,121 @@ $('#portal-body').addEventListener('click', async (e) => {
 
 // ---------- คาร์บอน ----------
 let carbonData = null, carbonAt = 0;
+let ggData = null, ggPreview = null;   // สถานะการเชื่อมต่อ GrowGreen และตัวอย่างข้อมูลที่เปิดดูอยู่
+const ggAllowed = () => S.me.role === 'admin' || (S.me.role === 'user' && S.me.member.kind === 'company');
 const hbars = (rows, unit) => { const max = Math.max(...rows.map((r) => r.value), 1e-9); return `<div class="hbars">${rows.map((r) => `<div class="hbar" title="${esc(r.label)}: ${num(r.value, 1)} ${unit}">
   <span class="hbar-label">${esc(r.label)}</span><span class="hbar-track"><span style="width:${Math.max(1, (r.value / max) * 100)}%"></span></span><b>${num(r.value, 1)}</b></div>`).join('')}</div>`; };
 
 async function renderCarbon() {
   if (!carbonData || Date.now() - carbonAt > 15000) {
     try { carbonData = await api('/carbon'); carbonAt = Date.now(); } catch (e) { return toast(e.message); }
+    if (ggAllowed()) { try { ggData = await api('/growgreen'); } catch { ggData = null; } }
   }
   if ($('#carbon-body').contains(document.activeElement) && ['INPUT', 'SELECT'].includes(document.activeElement.tagName)) return;
-  const c = carbonData, admin = S.me.role === 'admin', t = c.total, f = c.factors, fs = c.factor_source;
+  const c = carbonData, admin = S.me.role === 'admin', t = c.total, f = c.factors, fs = c.factor_source, inv = c.inventory_factors, is = c.inventory_source;
   const co2Rows = Object.entries(t.by_material).filter(([k]) => f[k]).map(([k, kg]) => ({ label: f[k].label, value: kg * f[k].kg_co2e_per_kg })).sort((a, b) => b.value - a.value);
   const maxMonth = Math.max(...c.monthly.map((m) => m.co2e_kg), 1e-9);
   const month = (m) => new Date(m + '-01T00:00:00').toLocaleDateString('th-TH', { month: 'short', year: '2-digit' });
   $('#carbon-body').innerHTML = `
     <div class="page-head"><div><h1>${admin ? 'คาร์บอนจากการรีไซเคิล' : 'สิ่งที่คุณช่วยลดได้'}</h1>
-      <p class="muted">ประมาณการก๊าซเรือนกระจกที่หลีกเลี่ยงได้ จากน้ำหนักจริงที่คนขับชั่ง</p></div>
+      <p class="muted">ตัวเลขสองชุดจากน้ำหนักจริงที่คนขับชั่ง: ที่หลีกเลี่ยงได้ และที่ปล่อยจากกระบวนการรีไซเคิล</p></div>
       ${admin ? '<a class="btn ghost small" href="/api/carbon.csv">ดาวน์โหลด CSV</a>' : ''}</div>
-    <div class="stat-grid three">
+    <div class="card"><h2>ตัวเลขคาร์บอนสองชุด ไม่นำมาหักกัน</h2>
+      <div class="ledger"><div><b>${num(t.recycling_co2e_kg, 2)} kgCO2e</b><span>ปล่อยจากกระบวนการรีไซเคิล ลงบัญชี Scope 3 หมวด 5</span></div>
+        <div><b>${num(t.co2e_kg, 1)} kgCO2e</b><span>หลีกเลี่ยงได้โดยประมาณ เทียบกับการผลิตจากวัตถุดิบใหม่</span></div></div>
+      <p class="muted">ตัวแรกคือสิ่งที่เกิดขึ้นจริงเมื่อส่งของไปรีไซเคิล ใช้ลงบัญชีก๊าซเรือนกระจกขององค์กร ตัวที่สองเป็นข้อมูลประกอบ ไม่ใช้ลดยอดในบัญชี</p></div>
+    <div class="stat-grid">
       <div class="stat"><b>${num(t.kg, 1)} กก.</b><span>วัสดุที่ส่งรีไซเคิลแล้ว</span></div>
-      <div class="stat accent"><b>${num(t.co2e_kg, 1)} kgCO2e</b><span>ที่หลีกเลี่ยงได้โดยประมาณ</span></div>
-      <div class="stat"><b>${num(t.value_thb, 2)} บาท</b><span>มูลค่าเทียบเท่าที่ ${num(c.carbon_price_thb)} บาท/tCO2e</span></div></div>
-    ${t.kg ? `<div class="card"><h2>แยกตามวัสดุ (kgCO2e)</h2>${hbars(co2Rows, 'kgCO2e')}</div>
-      <div class="card"><h2>รายเดือน (kgCO2e)</h2><div class="cols">${c.monthly.map((m) => `<div class="col" title="${month(m.month)}: ${num(m.co2e_kg, 1)} kgCO2e จาก ${num(m.kg, 1)} กก.">
+      <div class="stat"><b>${num(t.value_thb, 2)} บาท</b><span>ค่าที่หลีกเลี่ยงได้ ตีมูลค่าที่ ${num(c.carbon_price_thb)} บาท/tCO2e</span></div></div>
+    ${ggAllowed() && !admin ? growgreenHtml() : ''}
+    ${t.kg ? `<div class="card"><h2>ที่หลีกเลี่ยงได้ แยกตามวัสดุ (kgCO2e)</h2>${hbars(co2Rows, 'kgCO2e')}</div>
+      <div class="card"><h2>ที่หลีกเลี่ยงได้ รายเดือน (kgCO2e)</h2><div class="cols">${c.monthly.map((m) => `<div class="col" title="${month(m.month)}: ${num(m.co2e_kg, 1)} kgCO2e จาก ${num(m.kg, 1)} กก.">
         <b>${num(m.co2e_kg)}</b><span style="height:${Math.max(2, (m.co2e_kg / maxMonth) * 100)}%"></span><small>${month(m.month)}</small></div>`).join('')}</div></div>`
       : '<div class="card"><p class="muted">ยังไม่มีของที่รับแล้ว ตัวเลขจะขึ้นหลังคนขับรับของครั้งแรก</p></div>'}
-    ${admin ? `<div class="card"><h2>รายสมาชิก</h2><div class="table-wrap"><table><thead><tr><th>สมาชิก</th><th>ประเภท</th><th>ครั้งที่รับ</th><th>น้ำหนัก (กก.)</th><th>kgCO2e</th><th>มูลค่าเทียบเท่า (บาท)</th></tr></thead><tbody>
-      ${c.members.map((m) => `<tr><td>${esc(m.name)}</td><td>${m.kind === 'company' ? '<span class="badge info">บริษัท</span>' : 'ครัวเรือน'}</td><td class="num">${num(m.pickups)}</td><td class="num">${num(m.kg, 1)}</td><td class="num">${num(m.co2e_kg, 1)}</td><td class="num">${num(m.value_thb, 2)}</td></tr>`).join('')}
-      </tbody></table></div></div>` : ''}
+    ${admin ? `<div class="card"><h2>รายสมาชิก</h2><div class="table-wrap"><table><thead><tr><th>สมาชิก</th><th>ประเภท</th><th>ครั้งที่รับ</th><th>น้ำหนัก (กก.)</th><th>หลีกเลี่ยงได้ (kgCO2e)</th><th>มูลค่าเทียบเท่า (บาท)</th><th>ปล่อยจากการรีไซเคิล (kgCO2e)</th></tr></thead><tbody>
+      ${c.members.map((m) => `<tr><td>${esc(m.name)}</td><td>${m.kind === 'company' ? '<span class="badge info">บริษัท</span>' : 'ครัวเรือน'}</td><td class="num">${num(m.pickups)}</td><td class="num">${num(m.kg, 1)}</td><td class="num">${num(m.co2e_kg, 1)}</td><td class="num">${num(m.value_thb, 2)}</td><td class="num">${num(m.recycling_co2e_kg, 2)}</td></tr>`).join('')}
+      </tbody></table></div></div>${growgreenHtml()}` : ''}
     <div class="card"><h2>เครื่องคำนวณ</h2><p class="muted">ใส่น้ำหนักที่คาดว่าจะส่งรีไซเคิล เพื่อดูผลโดยประมาณก่อนทำสัญญารับกับบริษัท</p>
       <div class="calc">${Object.entries(f).map(([k, m]) => `<label><span><span class="dot mat-${k}"></span> ${esc(m.label)}</span><span class="unit"><input type="number" min="0" step="1" value="0" data-calc="${k}"><small>กก.</small></span></label>`).join('')}</div>
       <div class="totals" id="calc-out"></div></div>
     <div class="card"><h2>ที่มาของตัวเลข และข้อจำกัด</h2>
       <ul class="notes">
         <li>ปัจจัยที่ใช้อยู่มาจาก <strong>${esc(fs.source)}</strong>${fs.version ? ` (${esc(fs.version)})` : ''}${fs.reference_url ? ` <a href="${esc(fs.reference_url)}" target="_blank" rel="noopener">เอกสารอ้างอิง</a>` : ''}${fs.is_default ? ' ซึ่งเป็นค่าการปล่อยสุทธิของการรีไซเคิลของสหรัฐฯ ไม่ใช่ของไทย' : ` อัปเดตเมื่อ ${new Date(fs.updated_at * 1000).toLocaleString('th-TH')} โดย ${esc(fs.updated_by)}`}</li>
-        <li>ตัวเลขนี้เป็นประมาณการสำหรับรายงานภายในและงาน ESG ยังไม่ใช่คาร์บอนเครดิตที่ซื้อขายได้</li>
+        <li>การปล่อยจากกระบวนการรีไซเคิลใช้ค่าจาก <strong>${esc(is.source)}</strong>${is.reference_url ? ` <a href="${esc(is.reference_url)}" target="_blank" rel="noopener">เอกสารอ้างอิง</a>` : ''} ${esc(is.note)}</li>
+        <li>ค่าที่หลีกเลี่ยงได้เป็นประมาณการสำหรับรายงานภายในและงาน ESG ยังไม่ใช่คาร์บอนเครดิตที่ซื้อขายได้ และไม่ใช้ลดยอดการปล่อยในบัญชีขององค์กร</li>
         <li>การขอคาร์บอนเครดิต เช่น T-VER ของ อบก. ต้องขึ้นทะเบียนโครงการ ใช้ระเบียบวิธีที่รับรอง และผ่านการทวนสอบโดยผู้ประเมินภายนอก</li>
         <li>ราคาคาร์บอนที่ใช้ตีมูลค่าเป็นค่าสมมติ ผู้ดูแลระบบแก้ได้ที่หน้าเกณฑ์รับของ</li>
       </ul>
-      <div class="table-wrap"><table><thead><tr><th>วัสดุ</th><th>kgCO2e ที่หลีกเลี่ยงได้ต่อ 1 กก.</th></tr></thead><tbody>
-      ${Object.values(f).map((m) => `<tr><td>${esc(m.label)}</td><td class="num">${num(m.kg_co2e_per_kg, 2)}</td></tr>`).join('')}</tbody></table></div></div>
+      <div class="table-wrap"><table><thead><tr><th>วัสดุ</th><th>kgCO2e ที่หลีกเลี่ยงได้ต่อ 1 กก.</th><th>kgCO2e ที่ปล่อยจากการรีไซเคิลต่อ 1 กก.</th></tr></thead><tbody>
+      ${Object.entries(f).map(([k, m]) => `<tr><td>${esc(m.label)}</td><td class="num">${num(m.kg_co2e_per_kg, 2)}</td><td class="num">${inv[k] ? num(inv[k].kg_co2e_per_kg, 3) : ''}</td></tr>`).join('')}</tbody></table></div></div>
     ${admin ? carbonAdminHtml(c) : ''}`;
   calcCarbon();
 }
 let newToken = null;   // โทเคนที่เพิ่งสร้าง แสดงครั้งเดียวจนกว่าผู้ดูแลจะปิด
+
+// การ์ดเชื่อมต่อ GrowGreen: บริษัทตั้งค่าของตัวเอง ผู้ดูแลเห็นทุกบริษัทและกดส่งแทนได้
+function ggStatus(r) {
+  if (r.push_status === 'filed') return '<span class="stamp">ส่งแล้ว</span>';
+  if (r.push_status === 'held') return '<span class="stamp red">พักไว้</span>';
+  if (r.push_status === 'failed') return '<span class="badge danger">ส่งไม่สำเร็จ</span>';
+  return `<span class="muted">ยังไม่ส่ง</span>${r.hold.length ? ' <span class="badge warn">ติดธง</span>' : ''}`;
+}
+function ggLinkForm(g, link) {
+  const hint = link ? `ใช้ key เดิม ${esc(link.key_hint)}` : g.server_key_hint ? `เว้นว่างเพื่อใช้ key ของเซิร์ฟเวอร์ ${esc(g.server_key_hint)}` : 'gg_live_…';
+  return `<form id="gg-form" class="form-grid">
+      <label>API key ของ GrowGreen<input type="password" name="api_key" autocomplete="off" placeholder="${hint}" ${link || g.server_key_hint ? '' : 'required'}></label>
+      <label>รหัสสถานที่ใน GrowGreen<input type="text" name="site_code" maxlength="40" value="${link ? esc(link.site_code) : ''}" placeholder="เว้นว่างได้ถ้ามีสถานที่เดียว"></label>
+      <label>เมื่อรถส่งของถึงศูนย์<select name="auto_push"><option value="1" ${!link || link.auto_push ? 'selected' : ''}>ส่งเข้า GrowGreen อัตโนมัติ</option><option value="0" ${link && !link.auto_push ? 'selected' : ''}>รอให้กดส่งเอง</option></select></label>
+      <div class="row"><button class="btn primary" type="submit">${link ? 'บันทึก' : 'เชื่อมต่อ'}</button>
+        ${link ? '<button class="btn ghost" type="button" data-gg-unlink>ยกเลิกการเชื่อมต่อ</button>' : ''}</div>
+    </form>`;
+}
+function growgreenHtml() {
+  const g = ggData;
+  if (!g) return '';
+  const admin = S.me.role === 'admin', link = admin ? null : g.links[0];
+  const linked = new Set(g.links.map((l) => l.member_id));
+  const day = (ts) => new Date(ts * 1000).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+  let setup;
+  if (admin) {
+    setup = g.links.length ? `<div class="table-wrap"><table><thead><tr><th>บริษัท</th><th>องค์กรใน GrowGreen</th><th>รหัสสถานที่</th><th>API key</th><th>เมื่อรถถึงศูนย์</th></tr></thead><tbody>
+      ${g.links.map((l) => `<tr><td>${esc(l.member_name)}</td><td>${l.org_name ? `${esc(l.org_name)} <code>${esc(l.org_code)}</code>` : '<span class="muted">ยังไม่ได้ตรวจกับ GrowGreen</span>'}</td><td>${esc(l.site_code) || '–'}</td><td><code>${esc(l.key_hint)}</code></td><td>${l.auto_push ? 'ส่งอัตโนมัติ' : 'รอให้กดส่งเอง'}</td></tr>`).join('')}
+      </tbody></table></div>` : '<p class="muted">ยังไม่มีบริษัทที่เชื่อมต่อ บริษัทตั้งค่าได้เองจากหน้า “ลดคาร์บอน”</p>';
+  } else if (link) {
+    setup = `<div class="gg-org"><div><span>องค์กรใน GrowGreen</span><b>${link.org_name ? esc(link.org_name) : 'ยังไม่ได้ตรวจ'}</b></div>
+        <div><span>รหัสสถานที่</span><b>${esc(link.site_code) || '–'}</b></div>
+        <div><span>เมื่อรถถึงศูนย์</span><b>${link.auto_push ? 'ส่งอัตโนมัติ' : 'รอให้กดส่งเอง'}</b></div></div>
+      <details class="data-table"><summary>แก้ไขการเชื่อมต่อ</summary>${ggLinkForm(g, link)}</details>`;
+  } else {
+    setup = ggLinkForm(g, null);
+  }
+  const pv = ggPreview;
+  const head = `${admin ? '<th>บริษัท</th>' : ''}<th>วันที่รับ</th><th>เลขอ้างอิง</th><th>น้ำหนัก (กก.)</th><th>สถานะ</th><th>เอกสารร่างใน GrowGreen</th><th></th>`;
+  const rows = g.pickups.map((r) => {
+    const can = g.configured && linked.has(r.member_id) && r.push_status !== 'filed';
+    const doc = r.documents.length ? r.documents.map((d) => `<code>${esc(d.no)}</code>`).join(' ') + (r.emission_kgco2e != null ? ` <span class="muted">${num(r.emission_kgco2e, 2)} kgCO2e</span>` : '')
+      : r.push_status === 'failed' || r.push_status === 'held' ? `<span class="muted">${esc(r.error)}</span>` : '';
+    return `<tr>${admin ? `<td>${esc(r.member_name)}</td>` : ''}<td>${day(r.collected_at || r.created_at)}</td><td><code>${esc(r.reference_no)}</code></td><td class="num">${num(r.actual_kg, 1)}</td>
+      <td>${ggStatus(r)}</td><td>${doc}</td>
+      <td><div class="row"><button type="button" class="btn ghost small" data-gg-preview="${r.id}">ดูรายการ</button>${can ? `<button type="button" class="btn primary small" data-gg-push="${r.id}">${r.push_status === 'failed' ? 'ส่งใหม่' : 'ส่ง'}</button>` : ''}</div></td></tr>`;
+  }).join('');
+  const preview = pv ? `<section class="gg-preview"><header><strong>รายการของ ${esc(pv.reference_no)}</strong><button type="button" class="btn ghost small" data-gg-preview-hide>ปิด</button></header>
+      <p>${pv.filed ? `ส่งแล้วเป็นเอกสารร่าง ${pv.documents.map((d) => `<code>${esc(d.no)}</code>`).join(' ')} GrowGreen คำนวณการปล่อยได้ ${num(pv.emission_kgco2e, 2)} kgCO2e`
+        : pv.checked ? `GrowGreen ตรวจแล้ว ใช้ได้ทุกบรรทัด คำนวณการปล่อยได้ ${num(pv.emission_kgco2e, 2)} kgCO2e ยังไม่ได้บันทึก`
+        : pv.error ? `${esc(pv.error)}${pv.problems.length ? ': ' + pv.problems.map(esc).join('; ') : ''}`
+        : 'นี่คือข้อมูลที่จะส่ง ยังไม่ได้ตรวจกับ GrowGreen'}${pv.hold.length ? ` · ติดธง ${pv.hold.map((h) => esc(S.config.flags[h] || h)).join(', ')} จึงไม่ส่งอัตโนมัติ` : ''}</p>
+      <div class="table-wrap"><table><thead><tr><th>รหัสกิจกรรม</th><th>รายการ</th><th>วันที่</th><th>ปริมาณ (กก.)</th>${pv.checked ? '<th>GrowGreen คำนวณ (kgCO2e)</th>' : ''}</tr></thead><tbody>
+      ${pv.records.map((x) => `<tr><td><code>${esc(x.activityCode)}</code></td><td>${esc(x.itemName)}</td><td>${esc(x.startDate)}</td><td class="num">${num(x.quantity, 3)}</td>${pv.checked ? `<td class="num">${x.emissionKgco2e != null ? num(x.emissionKgco2e, 3) : ''}</td>` : ''}</tr>`).join('')}
+      </tbody></table></div></section>` : '';
+  return `<div class="card" id="gg-card"><h2>ส่งเข้าบัญชีคาร์บอน GrowGreen</h2>
+      <p class="muted">ส่งเฉพาะน้ำหนักที่ชั่งจริงแยกตามวัสดุ เป็นเอกสารร่างในหมวด 3-5-3 GrowGreen คำนวณการปล่อยเอง และคนของบริษัทต้องตรวจแล้วกดส่งอนุมัติใน GrowGreen</p>
+      ${g.config_problem ? `<div class="notice"><strong>ตั้งค่าเซิร์ฟเวอร์ไม่ถูก</strong> ${esc(g.config_problem)}</div>`
+        : g.configured ? '' : '<div class="notice"><strong>โหมดดูตัวอย่าง</strong> เซิร์ฟเวอร์นี้ยังไม่ได้ตั้ง <code>GROWGREEN_API_URL</code> จึงดูรายการที่จะส่งได้ แต่ยังไม่ส่งจริง</div>'}
+      ${setup}
+      ${g.pickups.length ? `<h3>การรับที่ส่งถึงศูนย์แล้ว</h3><div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>` : '<p class="muted">ยังไม่มีการรับที่ส่งถึงศูนย์คัดแยกแล้ว</p>'}
+      ${preview}
+    </div>`;
+}
 
 function carbonAdminHtml(c) {
   const fs = c.factor_source, origin = location.origin;
@@ -510,7 +569,7 @@ curl -X PUT ${origin}/api/v1/carbon/factors \\
     </div>`;
 }
 
-async function reloadCarbon() { carbonData = null; document.activeElement?.blur(); await refresh(); await renderCarbon(); }
+async function reloadCarbon() { carbonData = null; ggData = null; document.activeElement?.blur(); await refresh(); await renderCarbon(); }
 
 $('#carbon-body').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -521,6 +580,9 @@ $('#carbon-body').addEventListener('submit', async (e) => {
       for (const [k, v] of data) if (k.startsWith('f:')) factors[k.slice(2)] = Number(v);
       await api('/v1/carbon/factors', { source: data.get('source'), version: data.get('version'), reference_url: data.get('reference_url'), effective_date: data.get('effective_date'), factors }, 'PUT');
       toast('บันทึกค่าปัจจัยแล้ว การคำนวณทั้งระบบใช้ค่าชุดนี้');
+    } else if (e.target.id === 'gg-form') {
+      const res = await api('/growgreen/link', { api_key: data.get('api_key'), site_code: data.get('site_code'), auto_push: data.get('auto_push') === '1' }, 'PUT');
+      toast(res.org_name ? `เชื่อมต่อกับ ${res.org_name} แล้ว` : 'บันทึกการเชื่อมต่อแล้ว');
     } else if (e.target.id === 'token-form') {
       const res = await api('/admin/tokens', { name: data.get('name'), scopes: data.get('scope') === 'write' ? ['carbon:read', 'carbon:write'] : ['carbon:read'], member_id: data.get('member') ? Number(data.get('member')) : null });
       newToken = res.token;
@@ -534,6 +596,14 @@ $('#carbon-body').addEventListener('click', async (e) => {
   try {
     if (d.tokenRevoke) { if (!confirm('ยกเลิกโทเคนนี้ใช่ไหม ระบบที่ใช้โทเคนนี้จะเรียก API ไม่ได้ทันที')) return; await api(`/admin/tokens/${d.tokenRevoke}/revoke`, {}); await reloadCarbon(); }
     else if (d.tokenHide !== undefined) { newToken = null; await reloadCarbon(); }
+    else if (d.ggPreview) { ggPreview = await api(`/growgreen/requests/${d.ggPreview}/preview`); await renderCarbon(); $('#gg-card .gg-preview')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    else if (d.ggPreviewHide !== undefined) { ggPreview = null; await renderCarbon(); }
+    else if (d.ggPush) {
+      const res = await api(`/growgreen/requests/${d.ggPush}/push`, {});
+      toast(res.status === 'filed' ? `ส่งเป็นเอกสารร่างแล้ว ${res.documents.map((x) => x.no).join(', ')}` : `ส่งไม่สำเร็จ: ${res.error}`);
+      await reloadCarbon();
+    }
+    else if (d.ggUnlink !== undefined) { if (!confirm('ยกเลิกการเชื่อมต่อ GrowGreen ใช่ไหม เอกสารที่ส่งไปแล้วยังอยู่ใน GrowGreen')) return; await api('/growgreen/link', {}, 'DELETE'); await reloadCarbon(); }
     else if (d.tokenCopy !== undefined) { await navigator.clipboard.writeText(newToken); toast('คัดลอกโทเคนแล้ว'); }
     else if (d.factorReset !== undefined) { await api('/v1/carbon/factors', {}, 'DELETE'); toast('กลับไปใช้ค่าตั้งต้นแล้ว'); await reloadCarbon(); }
   } catch (err) { toast(err.message); }
@@ -541,10 +611,13 @@ $('#carbon-body').addEventListener('click', async (e) => {
 
 function calcCarbon() {
   if (!carbonData) return;
-  let kg = 0, co2 = 0;
-  for (const el of document.querySelectorAll('[data-calc]')) { const v = Math.max(0, Number(el.value) || 0); kg += v; co2 += v * carbonData.factors[el.dataset.calc].kg_co2e_per_kg; }
-  $('#calc-out').innerHTML = `<div><b>${num(kg, 1)}</b><span>กก. รวม</span></div><div><b>${num(co2, 1)}</b><span>kgCO2e</span></div>
-    <div><b>${num(co2 / 1000, 3)}</b><span>tCO2e</span></div><div><b>${num((co2 / 1000) * carbonData.carbon_price_thb, 2)}</b><span>บาท เทียบเท่า</span></div>`;
+  let kg = 0, co2 = 0, emitted = 0;
+  for (const el of document.querySelectorAll('[data-calc]')) {
+    const v = Math.max(0, Number(el.value) || 0), k = el.dataset.calc;
+    kg += v; co2 += v * carbonData.factors[k].kg_co2e_per_kg; emitted += v * (carbonData.inventory_factors[k]?.kg_co2e_per_kg || 0);
+  }
+  $('#calc-out').innerHTML = `<div><b>${num(kg, 1)}</b><span>กก. รวม</span></div><div><b>${num(co2, 1)}</b><span>kgCO2e หลีกเลี่ยงได้</span></div>
+    <div><b>${num((co2 / 1000) * carbonData.carbon_price_thb, 2)}</b><span>บาท เทียบเท่า</span></div><div><b>${num(emitted, 2)}</b><span>kgCO2e ปล่อย (Scope 3 หมวด 5)</span></div>`;
 }
 $('#carbon-body').addEventListener('input', (e) => { if (e.target.dataset.calc) calcCarbon(); });
 
@@ -563,15 +636,15 @@ function renderDriverMap(stops, nextId) {
   drvMap.invalidateSize();
   drvLayer.clearLayers();
   const pts = [[depot.lat, depot.lng], ...stops.map((s) => [s.r.lat, s.r.lng]), [depot.lat, depot.lng]];
-  if (stops.length) L.polyline(pts, { color: '#059669', weight: 4, opacity: 0.85, lineJoin: 'round' }).addTo(drvLayer);
+  if (stops.length) L.polyline(pts, { color: '#0b5d3b', weight: 4, opacity: 0.85, lineJoin: 'round' }).addTo(drvLayer);
   if (!stops.some((s) => s.r.id === drvSel)) drvSel = nextId ?? null;
   stops.forEach((s, n) => {
     const r = s.r, cls = `${isDone(r) ? 'done' : ''} ${r.status === 'verified' ? 'here' : ''} ${r.id === drvSel ? 'sel' : ''}`;
-    const color = isDone(r) ? '#94a3b8' : r.id === nextId ? '#059669' : '#0f1f1a';
-    L.marker([r.lat, r.lng], { icon: pinIcon(isDone(r) ? '✓' : n + 1, color, cls), title: `จุดที่ ${n + 1} ${r.member_name}` }).addTo(drvLayer)
+    const color = isDone(r) ? '#8a95a0' : r.id === nextId ? '#0b5d3b' : '#18202a';
+    L.marker([r.lat, r.lng], { icon: pinIcon(isDone(r) ? 'check' : n + 1, color, cls), title: `จุดที่ ${n + 1} ${r.member_name}` }).addTo(drvLayer)
       .on('click', () => { drvSel = r.id; renderDriverMap(drvStops, nextId); });
   });
-  L.marker([depot.lat, depot.lng], { icon: pinIcon('ศ', '#0f1f1a', 'depot'), title: depot.name }).addTo(drvLayer);
+  L.marker([depot.lat, depot.lng], { icon: pinIcon('ศ', '#18202a', 'depot'), title: depot.name }).addTo(drvLayer);
   const key = `${stops.map((s) => s.r.id).join(',')}:${drvMap.getSize().x}`;
   if (key !== drvFit) { drvMap.fitBounds(pts, { padding: [28, 28] }); drvFit = key; }
 
@@ -638,7 +711,7 @@ async function openNav(target) {
   const draw = (line, dashed) => {
     navLayer.clearLayers();
     L.polyline(line, { color: '#fff', weight: 9, opacity: 0.9, lineJoin: 'round' }).addTo(navLayer);   // ขอบขาวให้เส้นเด่นบนแผนที่
-    L.polyline(line, { color: '#10b981', weight: 5, lineJoin: 'round', dashArray: dashed ? '2 10' : null }).addTo(navLayer);
+    L.polyline(line, { color: '#0b5d3b', weight: 5, lineJoin: 'round', dashArray: dashed ? '2 10' : null }).addTo(navLayer);
     L.marker([origin.lat, origin.lng], { icon: L.divIcon({ className: '', html: '<div class="car-pin"></div>', iconSize: [30, 30], iconAnchor: [15, 15] }), title: originLabel }).addTo(navLayer);
     L.marker([dest.lat, dest.lng], { icon: L.divIcon({ className: '', html: '<div class="dest-pin"><span></span></div>', iconSize: [44, 44], iconAnchor: [22, 22] }), title: 'ปลายทาง' }).addTo(navLayer);
     navBounds = L.latLngBounds(line);
@@ -684,6 +757,18 @@ function closeNav(now) {
 $('#nav-back').addEventListener('click', () => closeNav());
 $('#nav-recenter').addEventListener('click', () => { if (navBounds) navMap.fitBounds(navBounds, { paddingTopLeft: [30, 90], paddingBottomRight: [30, 30] }); });
 $('#nav-sheet').addEventListener('click', (e) => { const b = e.target.closest('[data-arrive]'); if (b) { closeNav(); startScan(Number(b.dataset.arrive)); } });
+
+// ---------- ตารางบนจอแคบ ----------
+// ใส่ชื่อคอลัมน์ไว้ที่แต่ละช่อง ให้ CSS เรียงเป็นแถว "ชื่อ: ค่า" บนมือถือได้ ตัวเลขจึงไม่ถูกขอบจอตัด
+function labelTables(root = document) {
+  for (const table of root.querySelectorAll('.table-wrap table:not([data-labelled])')) {
+    const heads = [...table.querySelectorAll('thead th')].map((th) => th.textContent.trim());
+    if (!heads.length) continue;
+    for (const tr of table.querySelectorAll('tbody tr')) [...tr.children].forEach((td, i) => { if (heads[i]) td.dataset.th = heads[i]; else td.dataset.thNone = ''; });
+    table.dataset.labelled = '';
+  }
+}
+new MutationObserver(() => labelTables()).observe(document.body, { childList: true, subtree: true });
 
 // ---------- เริ่มทำงาน ----------
 (async () => {

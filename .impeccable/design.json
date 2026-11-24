@@ -1,0 +1,640 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-24T00:00:00.000Z",
+  "title": "Design System: แยกถูก รับถึงบ้าน",
+  "extensions": {
+    "colorMeta": {
+      "carrier-green": {
+        "role": "primary",
+        "displayName": "Carrier Green",
+        "canonical": "#0b5d3b",
+        "tonalRamp": [
+          "#04261a",
+          "#063a25",
+          "#084a2f",
+          "#0b5d3b",
+          "#3b8463",
+          "#84b59b",
+          "#d9eadf",
+          "#eef5f0"
+        ]
+      },
+      "carrier-green-dark": {
+        "role": "primary",
+        "displayName": "Carrier Green Dark",
+        "canonical": "#084a2f"
+      },
+      "carrier-green-deep": {
+        "role": "primary",
+        "displayName": "Carrier Green Deep",
+        "canonical": "#063a25"
+      },
+      "carrier-green-soft": {
+        "role": "primary",
+        "displayName": "Carrier Green Soft",
+        "canonical": "#d9eadf"
+      },
+      "carrier-green-tint": {
+        "role": "primary",
+        "displayName": "Carrier Green Tint",
+        "canonical": "#eef5f0"
+      },
+      "carbon-purple": {
+        "role": "secondary",
+        "displayName": "Carbon Purple",
+        "canonical": "#4b3f72",
+        "tonalRamp": [
+          "#1d1830",
+          "#2e2649",
+          "#3c325d",
+          "#4b3f72",
+          "#6f6493",
+          "#9f97b9",
+          "#cdc8dd",
+          "#ebe8f3"
+        ]
+      },
+      "carbon-purple-soft": {
+        "role": "secondary",
+        "displayName": "Carbon Purple Soft",
+        "canonical": "#ebe8f3"
+      },
+      "stamp-red": {
+        "role": "tertiary",
+        "displayName": "Stamp Red",
+        "canonical": "#c8102e",
+        "tonalRamp": [
+          "#3f0510",
+          "#6b0919",
+          "#980c23",
+          "#c8102e",
+          "#da4c63",
+          "#e98b9a",
+          "#f5c5cd",
+          "#fbe3e6"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#18202a",
+        "tonalRamp": [
+          "#0c1016",
+          "#18202a",
+          "#33404d",
+          "#55606a",
+          "#7a858e",
+          "#a7b0b4",
+          "#c9d0ca",
+          "#e9ede8"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Ink Muted",
+        "canonical": "#55606a"
+      },
+      "field-grey": {
+        "role": "neutral",
+        "displayName": "Field Grey",
+        "canonical": "#7a858e"
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#c9d0ca"
+      },
+      "table": {
+        "role": "neutral",
+        "displayName": "Table",
+        "canonical": "#e9ede8"
+      },
+      "coupon-stock": {
+        "role": "neutral",
+        "displayName": "Coupon Stock",
+        "canonical": "#ffffff"
+      },
+      "tab-head": {
+        "role": "neutral",
+        "displayName": "Tab Head",
+        "canonical": "#e4e8e3"
+      },
+      "ai-soft": {
+        "role": "neutral",
+        "displayName": "AI Note Fill",
+        "canonical": "#e7e9ee"
+      },
+      "warn": {
+        "role": "tertiary",
+        "displayName": "Warn",
+        "canonical": "#7d5200",
+        "tonalRamp": [
+          "#2e1e00",
+          "#553800",
+          "#7d5200",
+          "#a6710c",
+          "#c9962f",
+          "#e3bd6b",
+          "#f3dba0",
+          "#fbefc9"
+        ]
+      },
+      "warn-soft": {
+        "role": "tertiary",
+        "displayName": "Warn Soft",
+        "canonical": "#fbefc9"
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Danger",
+        "canonical": "#b00020"
+      },
+      "danger-soft": {
+        "role": "tertiary",
+        "displayName": "Danger Soft",
+        "canonical": "#fbe3e6"
+      },
+      "info": {
+        "role": "tertiary",
+        "displayName": "Info",
+        "canonical": "#1f4f8f",
+        "tonalRamp": [
+          "#0b1e38",
+          "#153660",
+          "#1f4f8f",
+          "#4470ab",
+          "#7697c6",
+          "#a8bfdd",
+          "#c9d8ec",
+          "#dfe9f6"
+        ]
+      },
+      "info-soft": {
+        "role": "tertiary",
+        "displayName": "Info Soft",
+        "canonical": "#dfe9f6"
+      },
+      "mat-pet": {
+        "role": "tertiary",
+        "displayName": "Material: PET",
+        "canonical": "#2f6fde"
+      },
+      "mat-hdpe": {
+        "role": "tertiary",
+        "displayName": "Material: HDPE",
+        "canonical": "#2ba3c9"
+      },
+      "mat-other-plastic": {
+        "role": "tertiary",
+        "displayName": "Material: Other Plastic",
+        "canonical": "#7a6fd6"
+      },
+      "mat-cardboard": {
+        "role": "tertiary",
+        "displayName": "Material: Cardboard",
+        "canonical": "#a8601a"
+      },
+      "mat-paper": {
+        "role": "tertiary",
+        "displayName": "Material: Paper",
+        "canonical": "#d2a514"
+      },
+      "mat-aluminum": {
+        "role": "tertiary",
+        "displayName": "Material: Aluminium",
+        "canonical": "#6f7c8a"
+      },
+      "mat-steel": {
+        "role": "tertiary",
+        "displayName": "Material: Steel",
+        "canonical": "#33404d"
+      },
+      "mat-glass": {
+        "role": "tertiary",
+        "displayName": "Material: Glass",
+        "canonical": "#1f9a8a"
+      },
+      "night-table": {
+        "role": "neutral",
+        "displayName": "Night Table",
+        "canonical": "#10161d",
+        "tonalRamp": [
+          "#080c11",
+          "#0b1016",
+          "#10161d",
+          "#18212b",
+          "#1f2a36",
+          "#232f3c",
+          "#2f3c4a",
+          "#5d6f83"
+        ]
+      },
+      "night-stock": {
+        "role": "neutral",
+        "displayName": "Night Stock",
+        "canonical": "#18212b"
+      },
+      "night-surface": {
+        "role": "neutral",
+        "displayName": "Night Surface",
+        "canonical": "#1f2a36"
+      },
+      "night-tab-head": {
+        "role": "neutral",
+        "displayName": "Night Tab Head",
+        "canonical": "#232f3c"
+      },
+      "night-shell": {
+        "role": "neutral",
+        "displayName": "Night Shell",
+        "canonical": "#0b1016"
+      },
+      "night-ink": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "canonical": "#e8edf2"
+      },
+      "night-ink-muted": {
+        "role": "neutral",
+        "displayName": "Night Ink Muted",
+        "canonical": "#a3b0bd"
+      },
+      "night-hairline": {
+        "role": "neutral",
+        "displayName": "Night Hairline",
+        "canonical": "#2f3c4a"
+      },
+      "night-rule": {
+        "role": "neutral",
+        "displayName": "Night Rule",
+        "canonical": "#5d6f83"
+      },
+      "night-field": {
+        "role": "neutral",
+        "displayName": "Night Field",
+        "canonical": "#6f8196"
+      },
+      "night-carrier-green": {
+        "role": "primary",
+        "displayName": "Night Carrier Green",
+        "canonical": "#1f7a52",
+        "tonalRamp": [
+          "#0a2a1c",
+          "#14573a",
+          "#1f7a52",
+          "#2f9a6a",
+          "#56b88c",
+          "#7fd6aa",
+          "#b3e8cf",
+          "#dff5ea"
+        ]
+      },
+      "night-green-text": {
+        "role": "primary",
+        "displayName": "Night Green Text",
+        "canonical": "#7fd6aa"
+      },
+      "night-lavender": {
+        "role": "secondary",
+        "displayName": "Lavender Figure",
+        "canonical": "#c7bdf0",
+        "tonalRamp": [
+          "#221c3d",
+          "#3a3166",
+          "#5a4f93",
+          "#7d70bd",
+          "#9b8cdc",
+          "#a99be8",
+          "#c7bdf0",
+          "#e6e1f9"
+        ]
+      },
+      "night-series": {
+        "role": "secondary",
+        "displayName": "Night Chart Series",
+        "canonical": "#a99be8"
+      },
+      "night-stamp": {
+        "role": "tertiary",
+        "displayName": "Night Stamp",
+        "canonical": "#ff7a8a"
+      },
+      "night-ink-plate": {
+        "role": "neutral",
+        "displayName": "Night Ink Plate",
+        "canonical": "#dfe5ec"
+      },
+      "night-warn": {
+        "role": "tertiary",
+        "displayName": "Night Warn",
+        "canonical": "#f2c14e"
+      },
+      "night-danger": {
+        "role": "tertiary",
+        "displayName": "Night Danger",
+        "canonical": "#ff8f9b"
+      },
+      "night-info": {
+        "role": "tertiary",
+        "displayName": "Night Info",
+        "canonical": "#9cc2f5"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page titles and the holder's name on the cover band (1.5rem there)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Coupon tab heads."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Sub-heads inside a coupon and dashboard widget heads."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text in Anuphan; helper text at 0.9rem in Ink Muted; paragraphs capped at 70 to 75ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Caption above a figure, table headers, form labels. 0.76 to 0.84rem, weight 600 to 700, sentence case."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Filled-in numbers in coupon cells and totals. Carbon purple, tabular. Steps observed: 1.35, 1.55, 1.7, 1.9rem."
+      },
+      "figure-lg": {
+        "displayName": "Figure Large",
+        "purpose": "The one headline number of a panel (2.5 to 2.6rem)."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Buttons, stamps and time slots."
+      }
+    },
+    "shadows": [
+      {
+        "name": "float",
+        "value": "0 10px 28px rgba(24, 32, 42, .18)",
+        "purpose": "Toast, chart tooltip, and controls floating over the driver's map. Never on coupons."
+      },
+      {
+        "name": "float-night",
+        "value": "0 12px 30px rgba(0, 0, 0, .5)",
+        "purpose": "The same role on the admin night theme."
+      },
+      {
+        "name": "sheet-edge",
+        "value": "0 -8px 24px rgba(24, 32, 42, .14)",
+        "purpose": "Bottom sheet of the driver's navigation mode."
+      },
+      {
+        "name": "map-pin",
+        "value": "0 2px 6px rgba(0, 0, 0, .35)",
+        "purpose": "Pins on map tiles, with a white ring."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Stamp landing, switch thumb, toast, navigation sheet, progress fill."
+      },
+      {
+        "name": "stamp-land",
+        "value": "0.45s cubic-bezier(.16, 1, .3, 1) both; from opacity 0, rotate(-12deg) scale(1.8)",
+        "purpose": "A stamp lands once when a stage changes or a request is sent. Removed under prefers-reduced-motion."
+      },
+      {
+        "name": "state",
+        "value": "0.15s",
+        "purpose": "Background and colour transitions on buttons, dropzone, quick-login rows, switch."
+      },
+      {
+        "name": "sheet-in",
+        "value": "transform 0.32s cubic-bezier(.16, 1, .3, 1), opacity 0.2s",
+        "purpose": "Driver navigation mode slides up; opacity only under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "totals-2col",
+        "value": "420px"
+      },
+      {
+        "name": "login-1col",
+        "value": "480px"
+      },
+      {
+        "name": "ledger-stack",
+        "value": "520px"
+      },
+      {
+        "name": "table-scroll",
+        "value": "640px"
+      },
+      {
+        "name": "nav-top",
+        "value": "900px"
+      },
+      {
+        "name": "dispatch-split",
+        "value": "960px"
+      },
+      {
+        "name": "price-split",
+        "value": "980px"
+      }
+    ],
+    "lines": [
+      {
+        "name": "frame",
+        "value": "1.5px solid var(--rule)",
+        "purpose": "Outer frame of every coupon and shared figure grid; rule under a tab head."
+      },
+      {
+        "name": "hairline",
+        "value": "1px solid var(--line)",
+        "purpose": "Inner rules between fields, rows and columns."
+      },
+      {
+        "name": "perforation",
+        "value": "2px dashed var(--rule)",
+        "purpose": "Tear line between stubs: QR stub, points stub, two-account ledger. Stage stubs use 2px dashed var(--line)."
+      },
+      {
+        "name": "stamp",
+        "value": "3px solid currentColor",
+        "purpose": "Stamp frame; 2px when small inside a table."
+      },
+      {
+        "name": "shell-rule",
+        "value": "3px solid var(--brand)",
+        "purpose": "Green rule under the top bar and under the admin rail brand."
+      },
+      {
+        "name": "focus",
+        "value": "3px solid var(--carbon), offset 2px",
+        "purpose": "Global focus-visible outline."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one main action of a coupon. Large and full-width at the end of the request flow.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">แจ้งให้มารับ</button>",
+      "css": ".ds-btn { font-family: var(--head); font-weight: 700; font-size: 1rem; line-height: 1.35; border: 1.5px solid transparent; border-radius: var(--radius); padding: .55rem 1.05rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: .4rem; transition: background .15s, color .15s; } .ds-btn-primary { background: var(--brand); color: #fff; border-color: var(--brand-deep); } .ds-btn-primary:hover { background: var(--brand-dark); } .ds-btn-primary:active { background: var(--brand-deep); } .ds-btn:focus-visible { outline: 3px solid var(--carbon); outline-offset: 2px; } .ds-btn:disabled { background: var(--tab); color: var(--muted); border-color: var(--line); cursor: not-allowed; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action: stock fill inside an ink frame.",
+      "html": "<button class=\"ds-btn-ghost\">ใช้ตำแหน่งปัจจุบัน</button>",
+      "css": ".ds-btn-ghost { font-family: var(--head); font-weight: 700; font-size: 1rem; line-height: 1.35; border: 1.5px solid var(--rule); border-radius: var(--radius); padding: .55rem 1.05rem; background: var(--surface); color: var(--ink); cursor: pointer; transition: background .15s, color .15s; } .ds-btn-ghost:hover { background: var(--tab); } .ds-btn-ghost:focus-visible { outline: 3px solid var(--carbon); outline-offset: 2px; }"
+    },
+    {
+      "name": "Coupon with Numbered Tab Head",
+      "kind": "card",
+      "refersTo": "coupon",
+      "description": "The base container: ink frame, tab head flush to the top edge, solid ink step box flush left.",
+      "html": "<div class=\"ds-coupon\"><div class=\"ds-coupon-head\"><span class=\"ds-step\">1</span><div><h2>ถ่ายรูปถุงที่จะให้มารับ</h2><p>ถ่ายทีละถุง หรือหลายถุงในรูปเดียวก็ได้</p></div></div><p class=\"ds-coupon-body\">เนื้อหาของคูปอง</p></div>",
+      "css": ".ds-coupon { background: var(--card); color: var(--ink); border: 1.5px solid var(--rule); border-radius: var(--radius); font-family: var(--text); max-width: 26rem; overflow: hidden; } .ds-coupon-head { display: flex; gap: .8rem; align-items: stretch; background: var(--tab); border-bottom: 1.5px solid var(--rule); padding-right: 1.05rem; } .ds-coupon-head > div { padding: .5rem 0; } .ds-coupon-head h2 { margin: 0; font-family: var(--head); font-size: 1.12rem; line-height: 1.35; font-weight: 700; } .ds-coupon-head p { margin: .1rem 0 0; font-size: .9rem; color: var(--muted); } .ds-step { min-width: 2.6rem; background: var(--rule); color: var(--card); font-family: var(--head); font-weight: 700; font-size: 1.35rem; display: grid; place-items: center; flex: none; } .ds-coupon-body { margin: 0; padding: 1.05rem; }"
+    },
+    {
+      "name": "Request Coupon with Stage Stubs",
+      "kind": "custom",
+      "refersTo": "coupon",
+      "description": "Signature component. One coupon per pickup: number and slot flag, four perforated stage stubs with one stamp on the current stage, a field row, and a QR stub behind a tear line.",
+      "html": "<article class=\"ds-req\"><div class=\"ds-req-head\"><strong>#1</strong><span class=\"ds-slot-flag\">13:00–15:00</span></div><ol class=\"ds-timeline\"><li class=\"ds-past\">แจ้งแล้ว</li><li class=\"ds-now\" data-stamp=\"คนขับถึงแล้ว\">คนขับถึง</li><li>รับของแล้ว</li><li>ถึงศูนย์</li></ol><div class=\"ds-fields\"><div><span>ถุง</span><b>1</b></div><div><span>ชิ้น</span><b>72</b></div><div><span>ประเมิน (กก.)</span><b>1.1</b></div></div><div class=\"ds-tear\">QR สำหรับให้คนขับสแกน <span class=\"ds-code\">676NM8</span></div></article>",
+      "css": ".ds-req { background: var(--card); color: var(--ink); border: 1.5px solid var(--rule); border-radius: var(--radius); overflow: hidden; font-family: var(--text); max-width: 24rem; } .ds-req-head { display: flex; align-items: stretch; justify-content: space-between; background: var(--tab); border-bottom: 1.5px solid var(--rule); } .ds-req-head strong { font-family: var(--head); font-size: 1.25rem; font-weight: 700; padding: .35rem .9rem; } .ds-slot-flag { display: grid; place-items: center; background: var(--brand); color: #fff; font-family: var(--head); font-weight: 700; font-size: 1.05rem; padding: 0 .9rem; font-variant-numeric: tabular-nums; } .ds-timeline { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); padding: 0; margin: 0; border-bottom: 1px solid var(--rule); counter-reset: ds-stage; } .ds-timeline li { counter-increment: ds-stage; position: relative; font-size: .86rem; font-weight: 600; color: var(--muted); padding: .45rem .5rem 2.5rem .6rem; line-height: 1.35; min-width: 0; } .ds-timeline li + li { border-left: 2px dashed var(--line); } .ds-timeline li::before { content: counter(ds-stage); display: block; font-family: var(--head); font-size: .82rem; font-weight: 700; } .ds-timeline .ds-past { color: var(--ink); background: linear-gradient(to top right, transparent calc(50% - .8px), var(--field) calc(50% - .8px), var(--field) calc(50% + .8px), transparent calc(50% + .8px)); } .ds-timeline .ds-now { color: var(--ink); z-index: 1; } .ds-timeline .ds-now::after { content: attr(data-stamp); position: absolute; left: .35rem; bottom: .3rem; font-family: var(--head); font-size: 1.12rem; font-weight: 700; line-height: 1.3; white-space: nowrap; color: var(--brand); border: 3px solid var(--brand); border-radius: var(--radius); padding: 0 .5rem; transform: rotate(-6deg); transform-origin: left bottom; background: var(--card); animation: ds-stamp-land .45s cubic-bezier(.16, 1, .3, 1) both; } @keyframes ds-stamp-land { from { opacity: 0; transform: rotate(-12deg) scale(1.8); } } @media (prefers-reduced-motion: reduce) { .ds-timeline .ds-now::after { animation: none; } } .ds-fields { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--rule); } .ds-fields > div { padding: .4rem .7rem .45rem; min-width: 0; } .ds-fields > div + div { border-left: 1px solid var(--line); } .ds-fields span { display: block; font-size: .76rem; font-weight: 700; color: var(--muted); } .ds-fields b { font-family: var(--head); font-size: 1.35rem; font-weight: 700; line-height: 1.2; color: var(--carbon); font-variant-numeric: tabular-nums; } .ds-tear { border-top: 2px dashed var(--rule); padding: .55rem .9rem; font-weight: 700; font-size: .95rem; display: flex; justify-content: space-between; align-items: center; gap: .6rem; } .ds-code { font-family: var(--head); font-weight: 700; font-size: 1.45rem; letter-spacing: .16em; color: var(--carbon); }"
+    },
+    {
+      "name": "Stamp",
+      "kind": "custom",
+      "refersTo": "stamp",
+      "description": "Completion mark: a tilted framed word in carrier green; red only for a void or held state.",
+      "html": "<span class=\"ds-stamp\">แจ้งรับแล้ว</span> <span class=\"ds-stamp ds-stamp-red\">พักไว้</span>",
+      "css": ".ds-stamp { display: inline-block; font-family: var(--head); font-weight: 700; font-size: 1.05rem; line-height: 1.3; color: var(--brand); border: 3px solid currentColor; border-radius: var(--radius); padding: .05rem .6rem; transform: rotate(-5deg); white-space: nowrap; margin: .4rem .6rem; } .ds-stamp-red { color: var(--stamp); }"
+    },
+    {
+      "name": "Figure Ledger",
+      "kind": "custom",
+      "refersTo": "figure-cell",
+      "description": "Related figures share one ink frame with inner rules; a muted label sits above each purple number.",
+      "html": "<div class=\"ds-ledger\"><div class=\"ds-cell\"><b>35</b><span>ถุงรอรับ</span></div><div class=\"ds-cell\"><b>80</b><span>กก. รอรับ โดยประมาณ</span></div><div class=\"ds-cell\"><b>59.2</b><span>กม. รวมของทุกคัน</span></div></div>",
+      "css": ".ds-ledger { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1.5px solid var(--rule); border-left: 1.5px solid var(--rule); background: var(--card); font-family: var(--text); } .ds-cell { display: flex; flex-direction: column-reverse; justify-content: flex-end; padding: .55rem .75rem .6rem; border-right: 1.5px solid var(--rule); border-bottom: 1.5px solid var(--rule); min-width: 0; } .ds-cell b { display: block; font-family: var(--head); font-size: 1.55rem; font-weight: 700; line-height: 1.25; color: var(--carbon); font-variant-numeric: tabular-nums; } .ds-cell span { font-size: .8rem; font-weight: 600; color: var(--muted); line-height: 1.4; }"
+    },
+    {
+      "name": "Status Badge and Bag Chip",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Framed rectangular status badges (never pills) and the bag chip with its solid ink code box.",
+      "html": "<span class=\"ds-badge\">รถกระบะ 2</span> <span class=\"ds-badge ds-badge-warn\">ของไม่ตรง</span> <span class=\"ds-badge ds-badge-ai\">AI</span> <span class=\"ds-chip\"><b>1-A</b>ถุงกระป๋องเบียร์</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; gap: .25rem; font-family: var(--text); font-size: .76rem; font-weight: 700; padding: .08rem .45rem; line-height: 1.5; border-radius: var(--radius-sm); border: 1px solid currentColor; background: var(--brand-tint); color: var(--brand-dark); white-space: nowrap; } .ds-badge-warn { background: var(--warn-soft); color: var(--warn); } .ds-badge-ai { background: var(--ai); color: var(--card); border-color: var(--ai); } .ds-chip { display: inline-flex; align-items: center; gap: .45rem; border: 1px solid var(--rule); border-radius: var(--radius-sm); padding: 0 .55rem 0 0; font-family: var(--text); font-size: .88rem; background: var(--surface); color: var(--ink); overflow: hidden; } .ds-chip b { background: var(--rule); color: var(--card); font-family: var(--head); padding: .1rem .5rem; font-size: .9rem; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Text and Number Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Field-grey frame that turns ink on hover; typed numbers are carbon purple.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"เช่น คนขับรถคันที่สองลาป่วย\"> <input class=\"ds-input ds-input-num\" type=\"number\" value=\"1.1\">",
+      "css": ".ds-input { font-family: var(--text); font-size: 1rem; padding: .5rem .65rem; border: 1.5px solid var(--field); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); } .ds-input:hover { border-color: var(--rule); } .ds-input:focus-visible { outline: 3px solid var(--carbon); outline-offset: 2px; } .ds-input::placeholder { color: var(--field); opacity: 1; } .ds-input-num { width: 6rem; text-align: right; font-variant-numeric: tabular-nums; color: var(--carbon); font-weight: 600; }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "custom",
+      "refersTo": "segment-active",
+      "description": "Ink-framed strip of choices; the active one is a solid ink box. Time slots follow the same active treatment.",
+      "html": "<div class=\"ds-seg\"><button>7 วัน</button><button class=\"ds-active\">30 วัน</button><button>60 วัน</button></div>",
+      "css": ".ds-seg { display: inline-flex; border: 1.5px solid var(--rule); border-radius: var(--radius-sm); overflow: hidden; } .ds-seg button { font-family: var(--text); font-size: .86rem; font-weight: 600; border: 0; background: var(--surface); color: var(--muted); padding: .32rem .75rem; cursor: pointer; } .ds-seg button + button { border-left: 1px solid var(--rule); } .ds-seg button:hover { color: var(--ink); } .ds-seg button.ds-active { background: var(--rule); color: var(--card); } .ds-seg button:focus-visible { outline: 3px solid var(--carbon); outline-offset: -3px; }"
+    },
+    {
+      "name": "Bottom Tab Bar",
+      "kind": "nav",
+      "description": "Phone navigation: equal columns, dashed separators, active tab with a 4px green top edge. Moves into the top bar from 900px.",
+      "html": "<nav class=\"ds-tabs\"><button class=\"ds-active\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"8\" r=\"3.5\"/><path d=\"M5 20c1-4 4-5.5 7-5.5s6 1.500 7 5.500\"/></svg>แจ้งรับ</button><button><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 17l5-5 4 3 7-8\"/><path d=\"M4 21h16\"/></svg>ราคา</button><button><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 19c0-8 5-13 14-14-1 9-6 14-14 14z\"/><path d=\"M5 19l7-7\"/></svg>ลดคาร์บอน</button></nav>",
+      "css": ".ds-tabs { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface); border-top: 1.5px solid var(--rule); max-width: 24rem; } .ds-tabs button { font-family: var(--text); font-size: .78rem; font-weight: 500; border: 0; border-top: 4px solid transparent; background: none; color: var(--muted); cursor: pointer; display: grid; justify-items: center; gap: .1rem; padding: .4rem .2rem .5rem; min-height: 64px; } .ds-tabs button + button { border-left: 1px dashed var(--line); } .ds-tabs svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; } .ds-tabs button.ds-active { color: var(--ink); font-weight: 700; border-top-color: var(--brand); background: var(--brand-tint); } .ds-tabs button:focus-visible { outline: 3px solid var(--carbon); outline-offset: -3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Coupon Book",
+    "overview": "A pickup is a book of coupons: request, verify, weigh, deliver. Each coupon is a sheet of white stock lying on a cool grey-green table, framed in navy-black ink, with a tabbed head, hairline inner rules, and dashed perforations between its stubs. When a stage is done it is stamped; passed stages are struck through and stay where they are. Nothing floats, nothing is pill-shaped, nothing glows.\n\nThree inks do the work. Carrier green is the service itself: the top rule of the shell, the cover band, the primary button, the slot flag, the \"done\" stamp. Carbon purple is the colour of anything that was filled in: every counted, weighed or priced figure, on every page. Navy-black ink draws the frames and fills the solid boxes that carry step numbers and bag codes. Red appears only where something was voided, went wrong, or cannot be recycled.\n\nThe admin back office is the same book on the night shift: dark stock, lighter rules, lavender figures. It is produced by redefining the tokens on the admin body, so every component is shared between the two themes.",
+    "keyCharacteristics": [
+      "Ruled frames in ink (1.5px), hairline inner rules (1px), dashed perforations between stubs.",
+      "Tab heads sit flush against the top edge of a coupon; step numbers are solid ink boxes flush left.",
+      "Figures are Athiti 700 in carbon purple with tabular numerals; their small label sits above them.",
+      "Corners are almost square (3px and 2px). Coupons carry no shadow.",
+      "Stage stubs that stamp: one tilted stamp on the current stage, landing once when the stage changes.",
+      "All interface text is Thai, set in Athiti (heads, figures, buttons) and Anuphan (reading text)."
+    ],
+    "rules": [
+      {
+        "name": "The Filled-In Figure Rule",
+        "body": "A number that was counted, weighed, priced or scored is carbon purple (lavender at night), Athiti 700, tabular. Purple is never used for a heading, a button or a decoration; if it is purple, somebody measured it. The one sanctioned second ink for a figure is carrier green dark, used to keep the second account apart in the two-account carbon ledger and on the one accented cell.",
+        "section": "colors"
+      },
+      {
+        "name": "The Stamp Red Rule",
+        "body": "Red marks a void, an error, a non-recyclable item or an unroutable stop. It is never a button fill, a brand accent or an emphasis colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Night Shift Rule",
+        "body": "Admin dark is a token swap on the body, nothing more. A new component is written once against the tokens and must read in both themes; solid ink boxes are the only elements with an explicit night override.",
+        "section": "colors"
+      },
+      {
+        "name": "The Label-Over-Figure Rule",
+        "body": "A figure cell is a small muted label above a large purple number, like a printed field with its entry written in. In markup the number comes first and the cell is reversed in layout, so assistive tech reads the value before its caption.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Anything numeric that can change or be compared (figures, table number columns, time slots, coordinates, deltas) uses tabular numerals, and table number columns are right-aligned.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Stock Rule",
+        "body": "Nothing that lies on the table casts a shadow. If an element is not floating over a map or over the page, it gets a ruled frame instead.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Perforation Rule",
+        "body": "Dashes are for tear lines and unfilled or voided things. Do not use a dashed border as general decoration, and do not separate two stubs of one coupon with a solid gap or a margin.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do build every new surface as a coupon: 1.5px ink frame, 3px corners, a tab head flush to the top edge, no shadow.",
+      "Do set every measured number in Athiti 700, carbon purple, tabular, with its muted label above it.",
+      "Do put related figures in one shared frame with inner rules rather than in separate boxes.",
+      "Do use a 2px dashed line wherever two stubs of one coupon meet, and for anything unfilled or voided.",
+      "Do show completion with a stamp: one per coupon, tilted, in carrier green; red only for a void.",
+      "Do keep passed stages visible and struck through; a finished step is never removed.",
+      "Do write components against the tokens so they read on both day stock and the admin night shift.",
+      "Do keep the two carbon figures side by side and separate.",
+      "Do disable the stamp landing under reduced motion."
+    ],
+    "donts": [
+      "Don't use rounded cards, pill badges or soft drop shadows; this system replaced exactly that look.",
+      "Don't put a shadow on anything that is not floating over a map or the page.",
+      "Don't use carbon purple for headings, buttons or decoration.",
+      "Don't use red as an accent or a button colour.",
+      "Don't place a small label line above a heading; the role is already stated in the top bar and the cover band's second line.",
+      "Don't set figures in Anuphan or in proportional numerals.",
+      "Don't use field grey for reading text.",
+      "Don't add a second stamp to a coupon or replay the landing on refresh.",
+      "Don't draw material swatches as round dots or invent new material colours per page."
+    ],
+    "openItems": [
+      "The pickup QR is a disclosure under a tear line on the request coupon, opened at full width on demand, not an always-visible stub.",
+      "Fonts are self-hosted in web/fonts (Athiti and Anuphan, SIL OFL) and precached by the service worker."
+    ]
+  }
+}

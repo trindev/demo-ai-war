@@ -1,0 +1,45 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;700;800&family=Sarabun:wght@400;500;700&display=swap">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:390px;height:844px;overflow:hidden;background:#0f5132;font-family:Sarabun,sans-serif;color:#fff;font-size:16px;line-height:1.4}
+header{padding:16px 16px 6px;display:flex;justify-content:space-between;align-items:baseline}
+header b{font-family:Kanit;font-weight:800;font-size:22px}
+header span{font-size:13px;opacity:.8}
+h1{font-family:Kanit;font-weight:700;font-size:15px;letter-spacing:.04em;color:#f6c90e;padding:8px 16px 6px;display:flex;justify-content:space-between}
+.board{margin:0 12px;border:3px solid #fff}
+.r{display:grid;grid-template-columns:1fr 96px 52px;align-items:center;border-bottom:2px solid rgba(255,255,255,.55);padding:7px 12px}
+.r:last-child{border-bottom:0}
+.r span{font-size:17px;font-weight:500}
+.r b{font-family:Kanit;font-weight:800;font-size:34px;line-height:1;text-align:right;color:#fff;font-variant-numeric:tabular-nums}
+.r i{font-style:normal;font-size:13px;text-align:right;color:#f6c90e;font-weight:700}
+.r.top b{color:#f6c90e;font-size:42px}
+.dn{color:#ff8a7a!important}
+.sheet{background:#fff;color:#1a1a1a;margin-top:16px;height:100%;padding:16px}
+.sheet h2{font-family:Kanit;font-weight:700;font-size:17px;margin-bottom:8px}
+.sum{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #1a1a1a;padding-bottom:8px}
+.sum b{font-family:Kanit;font-weight:800;font-size:44px;line-height:1}
+.sum small{font-size:14px;color:#555}
+.line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ccc;font-size:16px}
+.line b{font-family:Kanit;font-weight:700;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;background:#f6c90e;color:#1a1a1a;font-family:Kanit;font-weight:700;font-size:13px;padding:1px 8px;margin-left:6px}
+.btn{display:block;margin-top:16px;background:#f6c90e;color:#1a1a1a;font-family:Kanit;font-weight:800;font-size:20px;text-align:center;padding:15px;border:3px solid #1a1a1a}
+</style></head><body>
+<header><b>แยกถูก รับถึงบ้าน</b><span>คุณสมชาย</span></header>
+<h1><span>ราคารับซื้อวันนี้ บาท/กก.</span><span>24 พ.ย. 69</span></h1>
+<div class="board">
+ <div class="r top"><span>กระป๋องอะลูมิเนียม</span><b>62.40</b><i>▲ 0.80</i></div>
+ <div class="r"><span>ขวดพลาสติกใส PET</span><b>9.85</b><i>▲ 0.10</i></div>
+ <div class="r"><span>พลาสติกขุ่น HDPE</span><b>8.00</b><i>—</i></div>
+ <div class="r"><span>เหล็ก / กระป๋องโลหะ</span><b>3.40</b><i class="dn">▼ 0.05</i></div>
+ <div class="r"><span>กระดาษลัง</span><b>3.10</b><i>▲ 0.05</i></div>
+ <div class="r"><span>กระดาษ</span><b>2.60</b><i>—</i></div>
+</div>
+<div class="sheet">
+ <h2>ของที่คุณจะส่ง <span class="tag">AI นับจากรูป</span></h2>
+ <div class="sum"><div><small>ประมาณ 4.2 กก.</small><br><small>3 ถุง · รับ 13:00–15:00</small></div><b>38 บาท</b></div>
+ <div class="line"><span>ขวดน้ำดื่ม 24 ขวด</span><b>5.90</b></div>
+ <div class="line"><span>กระป๋องน้ำอัดลม 30 ใบ</span><b>28.10</b></div>
+ <div class="line"><span>ลังกระดาษ 4 ใบ</span><b>4.30</b></div>
+ <a class="btn">แจ้งรับ 3 ถุง</a>
+</div></body></html>

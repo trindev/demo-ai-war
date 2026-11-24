@@ -9,6 +9,10 @@ services:
       # บัญชีตัวอย่าง: รหัสผ่านร่วมของทุกบัญชี และเปิดหรือปิดปุ่ม quick login (ตั้งเป็น 0 เพื่อปิด)
       DEMO_PASSWORD: ${DEMO_PASSWORD:-demo1234}
       DEMO_QUICK_LOGIN: ${DEMO_QUICK_LOGIN:-1}
+      # ที่อยู่ API ของ GrowGreen (ลงท้ายด้วย /api/v1) ถ้าไม่ใส่ การเชื่อมต่อ GrowGreen ทำงานในโหมดดูตัวอย่าง ไม่ส่งจริง
+      GROWGREEN_API_URL: ${GROWGREEN_API_URL:-}
+      # API key ของ GrowGreen ที่ใช้เมื่อบริษัทกดเชื่อมต่อโดยไม่ใส่ key ของตัวเอง (เหมาะกับเดโมที่มีองค์กรเดียว)
+      GROWGREEN_API_KEY: ${GROWGREEN_API_KEY:-}
     volumes:
       - data:/data
       # แก้โค้ดแล้วเห็นผลทันทีโดยไม่ต้อง build ใหม่

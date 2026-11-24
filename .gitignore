@@ -1,3 +1,7 @@
 .env
 __pycache__/
 *.pyc
+.impeccable/review/
+.impeccable/ref/
+.impeccable/decision-payload.json
+.impeccable/brief-body.md

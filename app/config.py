@@ -117,6 +117,34 @@ WARM_RECYCLING_MTCO2E_PER_SHORT_TON = {
     "aluminum": -9.13, "steel": -1.83, "glass": -0.28,
 }
 SHORT_TON_KG = 907.185
+
+# การปล่อยจาก "กระบวนการรีไซเคิลเอง" (ขนส่งไปโรงงานและแปรรูป) เป็นคนละตัวเลขกับค่าที่หลีกเลี่ยงได้ด้านบน
+# บริษัทใช้ตัวเลขนี้ในบัญชีก๊าซเรือนกระจกขององค์กร Scope 3 หมวด 5 (ของเสียจากการดำเนินงาน) ห้ามนำไปหักกับค่าที่หลีกเลี่ยงได้
+# ที่มา: US EPA GHG Emission Factors Hub 2025 ตารางที่ 9 คอลัมน์ Recycled หน่วย MTCO2e ต่อ short ton (ฐาน GWP AR4)
+# เป็นชุดเดียวกับที่ระบบ GrowGreen ใช้ในหมวด 3-5-3 ตัวเลขของสองระบบจึงตรงกัน
+# pet, hdpe และ other_plastic ใช้ค่า Mixed Plastics; steel ใช้ค่า Mixed Metals; paper ใช้ค่า Mixed Paper (general)
+HUB_RECYCLED_MTCO2E_PER_SHORT_TON = {
+    "pet": 0.22, "hdpe": 0.22, "other_plastic": 0.22,
+    "cardboard": 0.11, "paper": 0.07,
+    "aluminum": 0.06, "steel": 0.23, "glass": 0.05,
+}
+INVENTORY_META = {
+    "source": "US EPA GHG Emission Factors Hub 2025 ตารางที่ 9 (Recycled)", "version": "2025",
+    "reference_url": "https://www.epa.gov/climateleadership/ghg-emission-factors-hub",
+    "note": "ค่าของสหรัฐฯ ฐาน GWP AR4 ใช้กับ Scope 3 หมวด 5 ของผู้ก่อของเสีย ไม่มีค่าที่ อบก. ประกาศแยกรายวัสดุสำหรับการรีไซเคิล",
+}
+
+# ---------- เชื่อมต่อ GrowGreen ----------
+# วัสดุของระบบนี้ -> รหัสกิจกรรมรีไซเคิลของ GrowGreen (หมวด 3-5-3 หน่วยกิโลกรัม)
+GROWGREEN_ACTIVITY = {
+    "pet": "RCY_MIXED_PLASTIC", "hdpe": "RCY_MIXED_PLASTIC", "other_plastic": "RCY_MIXED_PLASTIC",
+    "cardboard": "RCY_CARDBOARD", "paper": "RCY_MIXED_PAPER",
+    "aluminum": "RCY_ALUMINIUM_CAN", "steel": "RCY_MIXED_METAL", "glass": "RCY_GLASS",
+}
+GROWGREEN_VENDOR = "แยกถูก รับถึงบ้าน"
+# คำขอที่ติดธงเหล่านี้จะไม่ถูกส่งอัตโนมัติ ต้องมีคนตรวจแล้วกดส่งเอง
+GROWGREEN_HOLD_FLAGS = ("mismatch", "weight_diff")
+
 CARBON_DEFAULT_META = {
     "source": "US EPA WARM รุ่น 16", "version": "ธ.ค. 2566",
     "reference_url": "https://www.epa.gov/system/files/documents/2024-01/warm_management_practices_v16_dec.pdf",

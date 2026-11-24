@@ -9,10 +9,24 @@ import json
 import time
 
 from . import db
-from .config import CARBON_DEFAULT_META, SHORT_TON_KG, WARM_RECYCLING_MTCO2E_PER_SHORT_TON
+from .config import (CARBON_DEFAULT_META, HUB_RECYCLED_MTCO2E_PER_SHORT_TON, INVENTORY_META, SHORT_TON_KG,
+                     WARM_RECYCLING_MTCO2E_PER_SHORT_TON)
 
 # kgCO2e ที่หลีกเลี่ยงได้ต่อวัสดุ 1 กก. (แปลงจาก MTCO2E ต่อ short ton และกลับเครื่องหมายให้เป็นค่าบวก)
 DEFAULT_FACTORS = {k: round(-v * 1000 / SHORT_TON_KG, 3) for k, v in WARM_RECYCLING_MTCO2E_PER_SHORT_TON.items()}
+
+# kgCO2e ที่ "ปล่อย" จากกระบวนการรีไซเคิลต่อวัสดุ 1 กก. ใช้กับบัญชี Scope 3 หมวด 5 ของผู้ก่อของเสีย
+# เป็นตัวเลขคนละชุดกับค่าที่หลีกเลี่ยงได้ รายงานทุกแบบแสดงสองตัวเลขนี้แยกกัน และไม่นำมาหักกัน
+INVENTORY_FACTORS = {k: round(v * 1000 / SHORT_TON_KG, 4) for k, v in HUB_RECYCLED_MTCO2E_PER_SHORT_TON.items()}
+
+
+def inventory() -> dict:
+    """ค่าปัจจัยของการปล่อยจากกระบวนการรีไซเคิล พร้อมที่มา"""
+    return {**INVENTORY_META, "unit": "kgCO2e ที่ปล่อยจากกระบวนการรีไซเคิลต่อวัสดุ 1 กก.", "factors": dict(INVENTORY_FACTORS)}
+
+
+def emitted_kg(kg_by_material: dict[str, float]) -> float:
+    return sum(kg * INVENTORY_FACTORS.get(m, 0) for m, kg in kg_by_material.items())
 
 
 def current() -> dict:

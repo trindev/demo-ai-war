@@ -15,13 +15,13 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from fastapi import Cookie, Depends, FastAPI, HTTPException
+from fastapi import BackgroundTasks, Cookie, Depends, FastAPI, HTTPException
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import segno
 
-from . import ai, auth, carbon, db, routing, seed, settings
+from . import ai, auth, carbon, db, growgreen, routing, seed, settings
 from .config import (BAG_TAGS, CODE_ALPHABET, DEPOT, FLAGS, MATERIALS, PRICE_REFS, PRICE_SOURCES, QR_PREFIX, SIZES,
                      SLOT_BY_ID, SLOTS)
 from .estimate import aggregate_items, estimate
@@ -242,6 +242,13 @@ class TokenIn(BaseModel):
     name: str
     scopes: list[str]
     member_id: int | None = None   # ถ้าระบุ โทเคนเห็นข้อมูลของสมาชิกรายนี้เท่านั้น
+
+
+class GrowGreenLinkIn(BaseModel):
+    api_key: str = ""              # ว่าง = ใช้ key เดิม
+    site_code: str = ""            # รหัสสถานที่ใน GrowGreen ว่างได้เมื่อองค์กรมีสถานที่เดียว
+    auto_push: bool = True         # ส่งอัตโนมัติเมื่อรถส่งของถึงศูนย์คัดแยก
+    member_id: int | None = None   # ผู้ดูแลระบุสมาชิกที่จะตั้งค่าให้ สมาชิกตั้งได้เฉพาะของตัวเอง
 
 
 class FactorsIn(BaseModel):
@@ -548,7 +555,7 @@ def collect(rid: int, body: CollectIn, _: dict = Depends(auth.need("driver"))):
 
 
 @app.post("/api/dropoff")
-def dropoff(u: dict = Depends(auth.need("driver"))):
+def dropoff(background: BackgroundTasks, u: dict = Depends(auth.need("driver"))):
     """ปิดรอบ: รถส่งของที่รับมาทั้งหมดให้ศูนย์คัดแยก และสรุปน้ำหนักที่ต้องส่งต่อแต่ละโรงงาน"""
     vid = u["ref_id"]
     veh = db.query("SELECT * FROM vehicles WHERE id = ?", (vid,))[0]
@@ -573,6 +580,8 @@ def dropoff(u: dict = Depends(auth.need("driver"))):
     history = json.loads(db.get_kv("dropoffs") or "[]")
     history.append(summary)
     db.set_kv("dropoffs", json.dumps(history[-50:], ensure_ascii=False))
+    # ส่งน้ำหนักของบริษัทที่เชื่อมต่อ GrowGreen ไว้ หลังตอบคนขับแล้ว เพื่อไม่ให้การปิดรอบต้องรอระบบภายนอก
+    background.add_task(growgreen.push_delivered, [r["id"] for r in loads])
     return summary
 
 
@@ -734,10 +743,16 @@ def ack_notice(nid: int, u: dict = Depends(auth.need("partner"))):
 # ---------- คาร์บอน ----------
 
 def carbon_report(member_id: int | None = None) -> dict:
-    """ประมาณการก๊าซเรือนกระจกที่หลีกเลี่ยงได้ จากน้ำหนักจริงของถุงที่รับแล้ว แยกตามสมาชิก วัสดุ และเดือน"""
+    """ตัวเลขคาร์บอนสองชุดจากน้ำหนักจริงของถุงที่รับแล้ว แยกตามสมาชิก วัสดุ และเดือน
+
+    co2e_kg = ก๊าซเรือนกระจกที่หลีกเลี่ยงได้โดยประมาณ (ผลดีเทียบกับการผลิตจากวัตถุดิบใหม่)
+    recycling_co2e_kg = การปล่อยจากกระบวนการรีไซเคิลเอง ที่บริษัทใช้ลงบัญชี Scope 3 หมวด 5
+    สองตัวเลขนี้ตอบคนละคำถาม จึงรายงานแยกกันเสมอ และไม่มีช่องใดนำมาหักกัน
+    """
     mats = settings.materials()
     price = settings.get()["carbon_price_thb"]
     fac = carbon.current()
+    inv = carbon.inventory()
     where = "WHERE r.status IN ('collected', 'delivered')" + (" AND r.member_id = ?" if member_id else "")
     members: dict[int, dict] = {}
     monthly: dict[str, dict] = {}
@@ -759,6 +774,7 @@ def carbon_report(member_id: int | None = None) -> dict:
     def finish(bucket: dict) -> dict:
         co2 = carbon.avoided_kg(bucket["by_material"], fac["factors"])
         bucket.update(kg=round(bucket["kg"], 1), co2e_kg=round(co2, 1), value_thb=round(co2 / 1000 * price, 2),
+                      recycling_co2e_kg=round(carbon.emitted_kg(bucket["by_material"]), 2),
                       by_material={k: round(v, 1) for k, v in sorted(bucket["by_material"].items(), key=lambda kv: -kv[1])})
         return bucket
 
@@ -771,6 +787,8 @@ def carbon_report(member_id: int | None = None) -> dict:
     return {
         "factors": {k: {"label": mats[k]["label"], "kg_co2e_per_kg": v} for k, v in fac["factors"].items()},
         "factor_source": {k: fac[k] for k in ("source", "version", "reference_url", "effective_date", "note", "updated_at", "updated_by", "is_default")},
+        "inventory_factors": {k: {"label": mats[k]["label"], "kg_co2e_per_kg": v} for k, v in inv["factors"].items()},
+        "inventory_source": {k: inv[k] for k in ("source", "version", "reference_url", "note")},
         "carbon_price_thb": price, "members": rows, "total": finish(total),
         "monthly": [finish(monthly[k]) for k in sorted(monthly)],
     }
@@ -787,10 +805,11 @@ def carbon_csv(_: dict = Depends(auth.need("admin"))):
     buf = io.StringIO()
     w = csv.writer(buf)
     w.writerow(["สมาชิก", "ประเภท", "จำนวนครั้งที่รับ", "น้ำหนักรวม (กก.)", "ก๊าซเรือนกระจกที่หลีกเลี่ยงได้โดยประมาณ (kgCO2e)",
-                f"มูลค่าเทียบเท่าที่ {rep['carbon_price_thb']:g} บาทต่อ tCO2e (บาท)", "แยกตามวัสดุ (กก.)"])
+                f"มูลค่าเทียบเท่าที่ {rep['carbon_price_thb']:g} บาทต่อ tCO2e (บาท)",
+                "การปล่อยจากกระบวนการรีไซเคิล สำหรับ Scope 3 หมวด 5 (kgCO2e) ไม่นำไปหักกับค่าที่หลีกเลี่ยงได้", "แยกตามวัสดุ (กก.)"])
     for m in rep["members"]:
         w.writerow([m["name"], "บริษัท" if m["kind"] == "company" else "ครัวเรือน", m["pickups"], m["kg"], m["co2e_kg"], m["value_thb"],
-                    "; ".join(f'{rep["factors"][k]["label"]} {v}' for k, v in m["by_material"].items() if k in rep["factors"])])
+                    m["recycling_co2e_kg"], "; ".join(f'{rep["factors"][k]["label"]} {v}' for k, v in m["by_material"].items() if k in rep["factors"])])
     return Response("﻿" + buf.getvalue(), media_type="text/csv; charset=utf-8",
                     headers={"Content-Disposition": 'attachment; filename="carbon-estimate.csv"'})
 
@@ -844,12 +863,18 @@ def _public_report(rep: dict) -> dict:
     """รูปแบบข้อมูลคาร์บอนที่ส่งให้ระบบภายนอก"""
     return {
         "generated_at": datetime.now(BKK).isoformat(timespec="seconds"),
-        "unit": {"weight": "kg", "avoided_emissions": "kgCO2e"},
+        "unit": {"weight": "kg", "avoided_emissions": "kgCO2e", "recycling_emissions": "kgCO2e"},
         "disclaimer": "ประมาณการจากน้ำหนักจริงที่รับ ยังไม่ใช่คาร์บอนเครดิตที่ผ่านการทวนสอบ",
+        # co2e_kg คือค่าที่หลีกเลี่ยงได้ (ชื่อเดิม คงไว้ให้ระบบที่เรียกอยู่แล้ว) recycling_co2e_kg คือการปล่อยสำหรับ Scope 3 หมวด 5
+        "fields": {"co2e_kg": "ก๊าซเรือนกระจกที่หลีกเลี่ยงได้โดยประมาณ ไม่ใช่ตัวเลขสำหรับบัญชีการปล่อยขององค์กร",
+                   "recycling_co2e_kg": "การปล่อยจากกระบวนการรีไซเคิล ใช้กับ Scope 3 หมวด 5 ห้ามนำไปหักกับ co2e_kg"},
         "factor_source": rep["factor_source"], "factors": {k: v["kg_co2e_per_kg"] for k, v in rep["factors"].items()},
-        "total": {k: rep["total"][k] for k in ("kg", "co2e_kg", "by_material")},
-        "monthly": [{k: m[k] for k in ("month", "kg", "co2e_kg", "by_material")} for m in rep["monthly"]],
-        "members": [{k: m[k] for k in ("member_id", "name", "kind", "pickups", "kg", "co2e_kg", "by_material")} for m in rep["members"]],
+        "inventory_factor_source": rep["inventory_source"],
+        "inventory_factors": {k: v["kg_co2e_per_kg"] for k, v in rep["inventory_factors"].items()},
+        "total": {k: rep["total"][k] for k in ("kg", "co2e_kg", "recycling_co2e_kg", "by_material")},
+        "monthly": [{k: m[k] for k in ("month", "kg", "co2e_kg", "recycling_co2e_kg", "by_material")} for m in rep["monthly"]],
+        "members": [{k: m[k] for k in ("member_id", "name", "kind", "pickups", "kg", "co2e_kg", "recycling_co2e_kg", "by_material")}
+                    for m in rep["members"]],
     }
 
 
@@ -886,6 +911,67 @@ def v1_set_carbon_factors(body: FactorsIn, client: dict = Depends(auth.api_clien
 def v1_reset_carbon_factors(_: dict = Depends(auth.api_client("carbon:write"))):
     """กลับไปใช้ค่าตั้งต้น"""
     return carbon.reset()
+
+
+# ---------- เชื่อมต่อ GrowGreen: ส่งน้ำหนักที่รับจริงของบริษัทเข้าบัญชีคาร์บอนเป็นเอกสารร่าง ----------
+
+def _gg_member(u: dict, member_id: int | None = None) -> int:
+    """สมาชิกที่คำสั่งนี้ทำกับ: สมาชิกทำได้เฉพาะของตัวเองและต้องเป็นบริษัท ผู้ดูแลต้องระบุสมาชิก"""
+    mid = u["ref_id"] if u["role"] == "user" else member_id
+    rows = db.query("SELECT kind FROM members WHERE id = ?", (mid,)) if mid else []
+    if not rows:
+        raise HTTPException(404, "ไม่พบสมาชิก")
+    if rows[0]["kind"] != "company":
+        raise HTTPException(403, "การเชื่อมต่อ GrowGreen ใช้กับสมาชิกประเภทบริษัทเท่านั้น")
+    return mid
+
+
+def _gg_request(u: dict, rid: int) -> int:
+    """ตรวจว่าผู้ใช้มีสิทธิ์กับคำขอนี้: สมาชิกเห็นเฉพาะคำขอของตัวเอง"""
+    rows = db.query("SELECT member_id FROM requests WHERE id = ?", (rid,))
+    if not rows or (u["role"] == "user" and rows[0]["member_id"] != u["ref_id"]):
+        raise HTTPException(404, "ไม่พบคำขอ")
+    return _gg_member(u, rows[0]["member_id"])
+
+
+@app.get("/api/growgreen")
+def growgreen_overview(u: dict = Depends(auth.need("admin", "user"))):
+    return growgreen.overview(_gg_member(u) if u["role"] == "user" else None)
+
+
+@app.put("/api/growgreen/link")
+def growgreen_link(body: GrowGreenLinkIn, u: dict = Depends(auth.need("admin", "user"))):
+    """บันทึก API key ของ GrowGreen ถ้าเซิร์ฟเวอร์ตั้งที่อยู่ของ GrowGreen ไว้ จะตรวจ key ก่อนบันทึก"""
+    mid = _gg_member(u, body.member_id)
+    try:
+        return growgreen.save_link(mid, body.api_key, body.site_code, body.auto_push)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except growgreen.GrowGreenError as e:
+        raise HTTPException(502, str(e))
+
+
+@app.delete("/api/growgreen/link")
+def growgreen_unlink(member_id: int | None = None, u: dict = Depends(auth.need("admin", "user"))):
+    growgreen.delete_link(_gg_member(u, member_id))
+    return {"ok": True}
+
+
+@app.get("/api/growgreen/requests/{rid}/preview")
+def growgreen_preview(rid: int, u: dict = Depends(auth.need("admin", "user"))):
+    """ข้อมูลที่จะส่งของการรับหนึ่งครั้ง และผลตรวจจาก GrowGreen แบบไม่บันทึก (ถ้าเชื่อมต่อไว้)"""
+    _gg_request(u, rid)
+    return growgreen.preview(rid)
+
+
+@app.post("/api/growgreen/requests/{rid}/push")
+def growgreen_push(rid: int, u: dict = Depends(auth.need("admin", "user"))):
+    """ส่งการรับหนึ่งครั้งเข้า GrowGreen เป็นเอกสารร่าง ใช้กดส่งเอง ส่งใหม่หลังผิดพลาด หรือส่งคำขอที่ติดธงหลังตรวจแล้ว"""
+    _gg_request(u, rid)
+    try:
+        return growgreen.push(rid)
+    except ValueError as e:
+        raise HTTPException(409, str(e))
 
 
 @app.get("/api/health")

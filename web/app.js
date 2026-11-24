@@ -14,6 +14,7 @@ const ICONS = {
   camera: '<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
   trash: '<path d="M5 7h14M9 7V5h6v2M7 7l1 12h8l1-12"/>',
   check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  alert: '<path d="M12 5.5v8.5M12 17.8v.4"/>',
   nav: '<path d="M12 3l7 17-7-4-7 4z"/>',
   qr: '<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2v2h-2zM18 14h2v2h-2z"/>',
   spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
@@ -147,16 +148,28 @@ function tagChips(r) {
   }).join('');
 }
 
+// ขั้นล่าสุดของแต่ละคำขอที่เคยแสดง ใช้ให้ตราประทับ "ประทับลง" เฉพาะตอนที่ขั้นเปลี่ยน ไม่เล่นซ้ำทุกครั้งที่วาดหน้าใหม่
+const seenStage = {};
 function requestCard(r, st) {
   const stage = STAGE[r.status];
   const steps = ['แจ้งแล้ว', 'คนขับถึง', 'รับของแล้ว', 'ถึงศูนย์'];
+  const stamps = ['แจ้งรับแล้ว', 'ยืนยันจุดแล้ว', 'ชั่งแล้ว', 'ถึงศูนย์แล้ว'];
+  const fresh = seenStage[r.id] !== undefined && seenStage[r.id] !== stage;
+  seenStage[r.id] = stage;
+  const done = isDone(r);
+  const found = r.bags.filter((b) => b.found !== false).length;
   const qr = isOpen(r)
     ? `<details class="ticket" data-ticket="${r.id}" ${openTickets.has(r.id) ? 'open' : ''}><summary>${ic('qr', 16)} QR สำหรับให้คนขับสแกน</summary><div class="qr-box">${ticketHtml(r.id)}</div></details>` : '';
   return `<article class="req">
-    <div class="req-head"><strong>#${r.id}</strong>${statusTag(r, st)}<span class="muted">นัด ${esc(slotLabel(r.slot))}</span></div>
-    <ol class="timeline">${steps.map((t, n) => `<li class="${n <= stage ? 'done' : ''}">${t}</li>`).join('')}</ol>
+    <div class="req-head"><strong>#${r.id}</strong><span class="slot-flag">${esc(slotLabel(r.slot))}</span></div>
+    <ol class="timeline">${steps.map((t, n) => `<li class="${n < stage ? 'past' : n === stage ? `now${fresh ? ' fresh' : ''}` : ''}" ${n === stage ? `data-stamp="${stamps[n]}"` : ''}>${t}</li>`).join('')}</ol>
+    <div class="fields">
+      <div><span>ถุง</span><b>${num(done ? found : r.bags.length)}${done && found < r.bags.length ? `/${num(r.bags.length)}` : ''}</b></div>
+      <div><span>ชิ้น</span><b>${num(r.total_count)}</b></div>
+      <div><span>${done ? 'ชั่งจริง (กก.)' : 'ประเมิน (กก.)'}</span><b>${num(done ? r.actual_kg : r.est_kg, 1)}</b></div>
+    </div>
     <div class="tag-row">${tagChips(r)}</div>
-    <p class="muted">${num(r.bags.length)} ถุง · ${num(r.total_count)} ชิ้น · พิกัด ${coordLink(r.lat, r.lng)}</p>
+    <p class="muted">${done ? '' : `${statusTag(r, st)} · `}พิกัด ${coordLink(r.lat, r.lng)}</p>
     ${qr}</article>`;
 }
 
@@ -320,7 +333,7 @@ async function submitRequest() {
     const r = res.request;
     try { tickets[r.id] = await api(`/requests/${r.id}/ticket`); } catch { /* เปิดดู QR ได้จากรายการคำขอ */ }
     $('#submit-result').innerHTML = `<div class="card success">
-      <div class="success-head"><span class="check">${ic('check', 22)}</span>
+      <div class="success-head"><span class="stamp">แจ้งรับแล้ว</span>
         <div><h2>แจ้งรับเรียบร้อย เลขที่ #${r.id}</h2>
         <p class="muted">${res.stop ? `${esc(res.stop.vehicle)} จะถึงประมาณ ${hhmm(res.stop.eta)} (จุดที่ ${res.stop.seq} ของรอบ)` : 'ช่วงเวลานี้ยังจัดรถไม่ลง ผู้จัดรถจะติดต่อกลับ'}</p></div></div>
       <h3>เขียนป้ายบนถุงแต่ละใบ</h3>
@@ -343,7 +356,7 @@ async function submitRequest() {
 
 // ---------- ผู้จัดรถ ----------
 function pinIcon(text, color, cls = '') {
-  return L.divIcon({ className: '', html: `<div class="pin ${cls}" style="background:${color}">${esc(text)}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
+  return L.divIcon({ className: '', html: `<div class="pin ${cls}" style="background:${color}">${ICONS[text] ? ic(text, 15) : esc(text)}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
 }
 
 function renderDispatch() {
@@ -373,7 +386,7 @@ function renderDispatch() {
     const done = isDone(r);
     const here = r.status === 'verified';
     const fresh = now - r.created_at < 90 ? 'new' : '';
-    const icon = done ? pinIcon('✓', '#94a3b8', 'done') : st ? pinIcon(st.seq, st.color, `${fresh} ${here ? 'here' : ''}`) : pinIcon('!', '#b91c1c', fresh);
+    const icon = done ? pinIcon('check', '#8a95a0', 'done') : st ? pinIcon(st.seq, st.color, `${fresh} ${here ? 'here' : ''}`) : pinIcon('alert', '#c8102e', fresh);
     const where = done ? `${statusText(r)} ${num(r.actual_kg, 1)} กก.` : here ? statusText(r) : st ? `${esc(st.name)} · ถึงประมาณ ${hhmm(st.eta)}` : 'ยังจัดรถไม่ลง';
     L.marker([r.lat, r.lng], { icon }).addTo(dLayer).bindPopup(
       `<strong>#${r.id} ${esc(r.member_name)}</strong><br>${where}<br>นัด ${esc(slotLabel(r.slot))}<br>
@@ -381,7 +394,7 @@ function renderDispatch() {
        ${itemsText(r.items)}<br>รวม ${num(r.total_count)} ชิ้น · ประมาณ ${num(r.est_kg, 1)} กก.<br>พิกัด ${coordLink(r.lat, r.lng)}`);
     bounds.push([r.lat, r.lng]);
   }
-  L.marker([depot.lat, depot.lng], { icon: pinIcon('ศ', '#0f1f1a', 'depot') }).addTo(dLayer).bindPopup(esc(depot.name));
+  L.marker([depot.lat, depot.lng], { icon: pinIcon('ศ', '#18202a', 'depot') }).addTo(dLayer).bindPopup(esc(depot.name));
   // จัดมุมมองให้เห็นทุกหมุดครั้งแรก และจัดใหม่เมื่อขนาดแผนที่เปลี่ยน (เช่น หมุนจอหรือย่อขยายหน้าต่าง)
   const box = dMap.getSize();
   const fitKey = `${box.x}x${box.y}`;
@@ -504,7 +517,6 @@ function stopCard(s, n, isNext) {
   return `<div id="stop-${r.id}" class="card stop ${isDone(r) ? 'done' : ''} ${isNext ? 'next' : ''}">
     <div class="seq">${n + 1}</div>
     <div>
-      ${isNext ? '<span class="badge">จุดถัดไป</span><br>' : ''}
       <span class="stop-title">${hhmm(s.eta)} · ${esc(r.member_name)}</span><br>
       <span class="muted">${esc(r.address)} · นัด ${esc(slotLabel(r.slot))} · พิกัด ${coordLink(r.lat, r.lng)}</span><br>
       <span class="muted">${num(r.bags.length)} ถุง · ${num(r.total_count)} ชิ้น · ประมาณ ${num(r.est_kg, 1)} กก.</span>

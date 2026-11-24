@@ -1,0 +1,53 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Sarabun:wght@400;500;700&display=swap">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:390px;height:844px;overflow:hidden;background:#e6e9e3;font-family:Sarabun,sans-serif;color:#111411;font-size:16px;line-height:1.45}
+.code{font-family:"Chakra Petch",sans-serif;font-weight:700;letter-spacing:.02em}
+header{background:#0b5d3b;color:#fff;padding:14px 16px 12px;display:flex;justify-content:space-between;align-items:flex-end}
+header b{font-family:"Chakra Petch";font-size:20px;font-weight:700}
+header span{font-size:13px;opacity:.85}
+.strip{background:#111411;color:#ffd60a;font-family:"Chakra Petch";font-weight:600;font-size:13px;padding:5px 16px;display:flex;justify-content:space-between}
+main{padding:14px 12px}
+.label{background:#fff;border:2px solid #111411}
+.row{display:flex;border-bottom:2px solid #111411}
+.cell{padding:9px 11px;flex:1;border-right:2px solid #111411}
+.cell:last-child{border-right:0}
+.k{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#4a524c;display:block}
+.sort{background:#111411;color:#fff;font-size:44px;line-height:1;padding:12px 11px;flex:none;width:150px}
+.sort small{display:block;font-size:13px;color:#ffd60a;margin-top:6px;font-weight:600}
+.qr{width:116px;height:116px;flex:none;margin:10px;background:
+ conic-gradient(#111411 25%,#fff 0 50%,#111411 0 75%,#fff 0) 0 0/16px 16px}
+.bags{display:grid;grid-template-columns:repeat(3,1fr)}
+.bag{padding:9px 11px;border-right:2px solid #111411}
+.bag:last-child{border-right:0}
+.bag .code{font-size:24px;display:block}
+.mat{display:block;height:8px;margin:6px 0 5px}
+.stamp{display:inline-block;border:3px solid #0b5d3b;color:#0b5d3b;font-family:"Chakra Petch";font-weight:700;font-size:18px;padding:2px 10px;transform:rotate(-4deg);margin:10px 11px}
+.big{font-family:"Chakra Petch";font-weight:700;font-size:28px}
+h2{font-family:"Chakra Petch";font-size:16px;font-weight:700;margin:16px 4px 8px;display:flex;justify-content:space-between}
+.item{background:#fff;border:2px solid #111411;border-top:0;display:flex;align-items:center}
+.item:first-of-type{border-top:2px solid #111411}
+.item .code{background:#ffd60a;padding:12px 10px;font-size:18px;width:74px;text-align:center;border-right:2px solid #111411}
+.item p{padding:8px 11px;flex:1;font-size:15px}
+.item b{font-family:"Chakra Petch";padding-right:11px}
+.btn{display:block;margin:14px 0 0;background:#0b5d3b;color:#fff;font-family:"Chakra Petch";font-weight:700;font-size:19px;text-align:center;padding:15px;border:2px solid #111411}
+</style></head><body>
+<header><b>แยกถูก รับถึงบ้าน</b><span>บริษัท ค้าปลีกตัวอย่าง</span></header>
+<div class="strip"><span>รอบรับวันนี้ 13:00–15:00</span><span>รถกระบะ 1 · จุดที่ 4</span></div>
+<main>
+ <div class="label">
+  <div class="row"><div class="sort code">21<small>YT-21-JKCDJQ</small></div>
+   <div class="cell"><span class="k">ผู้ส่ง</span>อาคารสำนักงาน ถนนพหลโยธิน<br><span class="k" style="margin-top:6px">น้ำหนักประเมิน</span><span class="big">56.4 กก.</span></div></div>
+  <div class="row bags">
+   <div class="bag"><span class="code">21-A</span><span class="mat" style="background:#b7791f"></span>ลังกระดาษ 96 ชิ้น</div>
+   <div class="bag"><span class="code">21-B</span><span class="mat" style="background:#2563eb"></span>ขวด PET 220 ขวด</div>
+   <div class="bag"><span class="code">21-C</span><span class="mat" style="background:#6b7280"></span>กระป๋อง 104 ใบ</div></div>
+  <div class="row" style="border-bottom:0;align-items:center"><div class="qr"></div>
+   <div><span class="stamp">รอรับ</span><p style="padding:0 11px 10px;font-size:14px">ให้คนขับสแกน QR นี้ที่หน้าประตู<br>หรือบอกรหัส <b class="code">JKCDJQ</b></p></div></div>
+ </div>
+ <h2><span>รับไปแล้ว</span><span style="font-weight:500;font-size:14px">ดูทั้งหมด 8</span></h2>
+ <div class="item"><span class="code">20</span><p>15 พ.ย. · 4 ถุง · ชั่งจริง</p><b>65.6 กก.</b></div>
+ <div class="item"><span class="code">19</span><p>8 พ.ย. · 3 ถุง · ชั่งจริง</p><b>56.8 กก.</b></div>
+ <a class="btn">ถ่ายรูปแจ้งรับ</a>
+</main></body></html>
